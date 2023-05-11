@@ -47,34 +47,82 @@ Function: The speed topic subscription Callback function, according to the subsc
 void turn_on_robot::Cmd_Vel_Callback(const geometry_msgs::Twist &twist_aux)
 {
   short  transition;  //intermediate variable //中间变量
-
-  Send_Data.tx[0]=FRAME_HEADER; //frame head 0x7B //帧头0X7B
-  Send_Data.tx[1] = 0; //set aside //预留位
-  Send_Data.tx[2] = 0; //set aside //预留位
-
+  float need_return_vel;
+  // Send_Data.tx[0]=FRAME_HEADER; //frame head 0x7B //帧头0X7B
+  // Send_Data.tx[1] = 0; //set aside //预留位
+  // Send_Data.tx[2] = 0; //set aside //预留位
+  Send_Data.Tdata[0]=FRAME_HEADER; //frame head 0x7B //帧头0X7B
+  Send_Data.Tdata[1] = 0; //set aside //预留位
+  Send_Data.Tdata[2] = 0; //set aside //预留位
   //The target velocity of the X-axis of the robot
   //机器人x轴的目标线速度
-  transition=0;
-  transition = twist_aux.linear.x*1000; //将浮点数放大一千倍，简化传输
-  Send_Data.tx[4] = transition;     //取数据的低8位
-  Send_Data.tx[3] = transition>>8;  //取数据的高8位
+  //transition=0;
+  // transition = twist_aux.linear.x*1000; //将浮点数放大一千倍，简化传输
+  // Send_Data.tx[4] = transition;     //取数据的低8位
+  // Send_Data.tx[3] = transition>>8;  //取数据的高8位
+  need_return_vel = twist_aux.linear.x;
+  unsigned char* bytes_ptr_x = reinterpret_cast<unsigned char*>(&need_return_vel);
+  unsigned char bytes[4];
+  for (int i = 0; i < 4; ++i)
+  {
+    bytes[i] = *(bytes_ptr_x + i);
+  }
+  unsigned char byte1 = bytes[0];
+  unsigned char byte2 = bytes[1];
+  unsigned char byte3 = bytes[2];
+  unsigned char byte4 = bytes[3];
+  Send_Data.Tdata[3] = byte1;
+  Send_Data.Tdata[4] = byte2;
+  Send_Data.Tdata[5] = byte3;
+  Send_Data.Tdata[6] = byte4;
 
+  need_return_vel = twist_aux.linear.y;
+  unsigned char* bytes_ptr_y = reinterpret_cast<unsigned char*>(&need_return_vel);
+  for (int i = 0; i < 4; ++i)
+  {
+    bytes[i] = *(bytes_ptr_y + i);
+  }
+  byte1 = bytes[0];
+  byte2 = bytes[1];
+  byte3 = bytes[2];
+  byte4 = bytes[3];
+  Append_CRC16_Check_Sum(Send_Data.tx , 9);
+  Send_Data.Tdata[9] = byte1;
+  Send_Data.Tdata[10] = byte2;
+  Send_Data.Tdata[11] = byte3;
+  Send_Data.Tdata[12] = byte4;
+
+  need_return_vel = twist_aux.linear.z;
+  unsigned char* bytes_ptr_z = reinterpret_cast<unsigned char*>(&need_return_vel);
+  for (int i = 0; i < 4; ++i)
+  {
+    bytes[i] = *(bytes_ptr_y + i);
+  }
+  byte1 = bytes[0];
+  byte2 = bytes[1];
+  byte3 = bytes[2];
+  byte4 = bytes[3];
+  Send_Data.Tdata[13] = byte1;
+  Send_Data.Tdata[14] = byte2;
+  Send_Data.Tdata[15] = byte3;
+  Send_Data.Tdata[16] = byte4;
+  Append_CRC16_Check_Sum(Send_Data.tx , 19);
   //The target velocity of the Y-axis of the robot
   //机器人y轴的目标线速度
-  transition=0;
-  transition = twist_aux.linear.y*1000;
-  Send_Data.tx[6] = transition;
-  Send_Data.tx[5] = transition>>8;
+  // transition=0;
+  // transition = twist_aux.linear.y*1000;
+  // Send_Data.tx[6] = transition;
+  // Send_Data.tx[5] = transition>>8;
 
   //The target angular velocity of the robot's Z axis
   //机器人z轴的目标角速度
-  transition=0;
-  transition = twist_aux.angular.z*1000;
-  Send_Data.tx[8] = transition;
-  Send_Data.tx[7] = transition>>8;
+  // transition=0;
+  // transition = twist_aux.angular.z*1000;
+  // Send_Data.tx[8] = transition;
+  // Send_Data.tx[7] = transition>>8;
 
-  Send_Data.tx[9]=Check_Sum(9,SEND_DATA_CHECK); //For the BCC check bits, see the Check_Sum function //BCC校验位，规则参见Check_Sum函数
-  Send_Data.tx[10]=FRAME_TAIL; //frame tail 0x7D //帧尾0X7D
+  // Send_Data.tx[9]=Check_Sum(9,SEND_DATA_CHECK); //For the BCC check bits, see the Check_Sum function //BCC校验位，规则参见Check_Sum函数
+  Send_Data.tx[19]=FRAME_TAIL; //frame tail 0x7D //帧尾0X7D
   try
   {
     Stm32_Serial.write(Send_Data.tx,sizeof (Send_Data.tx)); //Sends data to the downloader via serial port //通过串口向下位机发送数据 
@@ -193,6 +241,95 @@ unsigned char turn_on_robot::Check_Sum(unsigned char Count_Number,unsigned char 
      }
   }
   return check_sum; //Returns the bitwise XOR result //返回按位异或结果
+}
+/**************************************
+Date: May 11, 2023
+功能: CRC发送校验中间函数
+输入参数： 
+***************************************/
+uint16_t CRC_INIT = 0xffff;
+const unsigned char CRC8_INIT = 0xff;
+uint16_t turn_on_robot::Get_CRC16_Check_Sum(uint8_t *pchMessage, uint32_t dwLength, uint16_t wCRC)
+{
+	uint8_t chData;
+
+	if (pchMessage == NULL)
+	{
+		return 0xFFFF;
+	}
+
+	while (dwLength--)
+	{
+		chData = *pchMessage++;
+		(wCRC) = ((uint16_t)(wCRC) >> 8) ^ wCRC_Table[((uint16_t)(wCRC) ^ (uint16_t)(chData)) & 0x00ff];
+	}
+
+	return wCRC;
+}
+unsigned char turn_on_robot::Get_CRC8_Check_Sum(unsigned char *pchMessage, unsigned int dwLength, unsigned char ucCRC8)
+{
+	unsigned char ucIndex;
+
+	while (dwLength--)
+	{
+		ucIndex = ucCRC8 ^ (*pchMessage++);
+		ucCRC8 = CRC8_TAB[ucIndex];
+	}
+
+	return (ucCRC8);
+}
+/**************************************
+Date: May 11, 2023
+功能: CRC发送校验
+输入参数： 
+***************************************/
+void turn_on_robot::Append_CRC16_Check_Sum(uint8_t *pchMessage, uint32_t dwLength)
+{
+	uint16_t wCRC = 0;
+
+	if ((pchMessage == NULL) || (dwLength <= 2))
+	{
+		return;
+	}
+
+	wCRC = Get_CRC16_Check_Sum((uint8_t *)pchMessage, dwLength - 2, CRC_INIT);
+	pchMessage[dwLength - 2] = (uint8_t)(wCRC & 0x00ff);
+	pchMessage[dwLength - 1] = (uint8_t)((wCRC >> 8) & 0x00ff);
+}
+void turn_on_robot::Append_CRC8_Check_Sum(unsigned char *pchMessage, unsigned int dwLength)
+{
+	unsigned char ucCRC = 0;
+
+	if ((pchMessage == 0) || (dwLength <= 2)) return;
+
+	ucCRC = Get_CRC8_Check_Sum((unsigned char *)pchMessage, dwLength - 1, CRC8_INIT);
+	pchMessage[dwLength - 1] = ucCRC;
+}
+/**************************************
+Date: May 11, 2023
+功能: CRC接收校验
+输入参数： 
+***************************************/
+unsigned int turn_on_robot::Verify_CRC8_Check_Sum(unsigned char *pchMessage, unsigned int dwLength)
+{
+	unsigned char ucExpected = 0;
+
+	if ((pchMessage == 0) || (dwLength <= 2)) return 0;
+
+	ucExpected = Get_CRC8_Check_Sum(pchMessage, dwLength - 1, CRC8_INIT);
+	return (ucExpected == pchMessage[dwLength - 1]);
+}
+uint32_t turn_on_robot::Verify_CRC16_Check_Sum(uint8_t *pchMessage, uint32_t dwLength)
+{
+	uint16_t wExpected = 0;
+
+	if ((pchMessage == NULL) || (dwLength <= 2))
+	{
+		return 0;
+	}
+
+	wExpected = Get_CRC16_Check_Sum(pchMessage, dwLength - 2, CRC_INIT);
+	return ((wExpected & 0xff) == pchMessage[dwLength - 2] && ((wExpected >> 8) & 0xff) == pchMessage[dwLength - 1]);
 }
 /**************************************
 Date: November 18, 2021
@@ -408,6 +545,123 @@ bool turn_on_robot::Get_Sensor_Data_New()
   }
   return false;
 }
+bool turn_on_robot::Get_Sensor_Data_New_New()
+{
+  int bytes;
+  bytes = Stm32_Serial.read(rdata,32);
+  bytes = Stm32_Serial.read(rdata+32,26);
+   // printf("0x%02X ", (unsigned char)rdata[0]);
+    if (rdata[0]==0XA5 && rdata[1]==0XD1 && Verify_CRC8_Check_Sum(rdata, 3) && Verify_CRC16_Check_Sum(rdata,33) && Verify_CRC16_Check_Sum(rdata,59) && rdata[60]==0XB2)
+    {
+        getQuat(&rdata[3]);
+        getGyro(&rdata[19]);
+        getAcc(&rdata[33]);
+        get_xyspeed_and_z(&rdata[45]);
+        Robot_Vel.X = vel[0];
+        Robot_Vel.Y = vel[1];
+        Robot_Vel.Z = vel[2];
+        Mpu6050_Data.gyros_x_data = gyro[0];
+        Mpu6050_Data.gyros_y_data = gyro[1];
+        Mpu6050_Data.gyros_z_data = gyro[2];
+        Mpu6050_Data.accele_x_data = acc[0];
+        Mpu6050_Data.accele_y_data = acc[1];
+        Mpu6050_Data.accele_z_data = acc[2];
+        Mpu6050.linear_acceleration.x = Mpu6050_Data.accele_x_data ;
+        Mpu6050.linear_acceleration.y = Mpu6050_Data.accele_y_data ;
+        Mpu6050.linear_acceleration.z = Mpu6050_Data.accele_z_data ;
+        Mpu6050.angular_velocity.x =  Mpu6050_Data.gyros_x_data ;
+        Mpu6050.angular_velocity.y =  Mpu6050_Data.gyros_y_data ;
+        Mpu6050.angular_velocity.z =  Mpu6050_Data.gyros_z_data ;
+        Power_voltage =22;
+    }
+}
+/**
+ * @brief 解算四元数数据
+ * 
+ * @param data 四元数首地址指针
+ * @return
+ */
+bool turn_on_robot::getQuat(unsigned char *data)
+{
+    unsigned char* f1 = &data[0];
+    unsigned char* f2 = &data[4];
+    unsigned char* f3 = &data[8];
+    unsigned char* f4 = &data[12];
+
+    quat[0] = exchange_data(f1,process_float_data[0]);
+    quat[1] = exchange_data(f2,process_float_data[4]);
+    quat[2] = exchange_data(f3,process_float_data[8]);
+    quat[3] = exchange_data(f4,process_float_data[12]);
+    return true;
+}
+
+
+bool turn_on_robot::get_xyspeed_and_z(unsigned char *data)
+{
+    unsigned char* f1 = &data[0];
+    unsigned char* f2 = &data[4];
+    unsigned char* f3 = &data[8];
+
+    vel[0] = exchange_data(f1,process_float_data[40]);
+    vel[1] = exchange_data(f2,process_float_data[44]);
+    vel[2] = exchange_data(f3,process_float_data[48]);
+    return true;
+}
+
+/**
+ * @brief 解算角速度数据
+ * 
+ * @param data 角速度首地址指针
+ * @return
+ */
+bool turn_on_robot::getGyro(unsigned char *data)
+{    
+    unsigned char* f1 = &data[0];
+    unsigned char* f2 = &data[4];
+    unsigned char* f3 = &data[8];
+
+    gyro[0] = exchange_data(f1,process_float_data[16]);
+    gyro[1] = exchange_data(f2,process_float_data[20]);
+    gyro[2] = exchange_data(f3,process_float_data[24]);
+    return true;
+}
+
+/**
+ * @brief 解算加速度数据
+ * 
+ * @param data 加速度首地址指针
+ * @return
+ */
+bool turn_on_robot::getAcc(unsigned char *data)
+{
+    unsigned char* f1 = &data[0];
+    unsigned char* f2 = &data[4];
+    unsigned char* f3 = &data[8];
+
+    acc[0] = exchange_data(f1,process_float_data[28]);
+    acc[1] = exchange_data(f2,process_float_data[32]);
+    acc[2] = exchange_data(f3,process_float_data[36]);
+    return true;
+}
+/**
+ * @brief 将4个uchar转换为float
+ * @param data data首地址指针
+ * @return
+ */
+// float SerialPort::exchange_data(unsigned char *data)
+// {
+//     float float_data;
+//     float_data = *((float*)data);
+//     return float_data;
+// };
+float turn_on_robot::exchange_data(unsigned char *data,float need_return_float_data)
+{
+    *(uint8_t *)&need_return_float_data = data[0];
+    *((uint8_t *)&need_return_float_data+1) = data[1];
+    *((uint8_t *)&need_return_float_data+2) = data[2];
+    *((uint8_t *)&need_return_float_data+3) = data[3];
+    return need_return_float_data;
+};
 /**************************************
 Date: January 28, 2021
 Function: Loop access to the lower computer data and issue topics
