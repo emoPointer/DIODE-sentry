@@ -39,6 +39,11 @@ float turn_on_robot::Odom_Trans(uint8_t Data_High,uint8_t Data_Low)
   data_return   =  (transition_16 / 1000)+(transition_16 % 1000)*0.001; // The speed unit is changed from mm/s to m/s //速度单位从mm/s转换为m/s
   return data_return;
 }
+typedef union
+{
+    float f;
+    unsigned char c[4];
+} float2uchar;
 /**************************************
 Date: January 28, 2021
 Function: The speed topic subscription Callback function, according to the subscribed instructions through the serial port command control of the lower computer
@@ -47,7 +52,9 @@ Function: The speed topic subscription Callback function, according to the subsc
 void turn_on_robot::Cmd_Vel_Callback(const geometry_msgs::Twist &twist_aux)
 {
   short  transition;  //intermediate variable //中间变量
-  float need_return_vel;
+  float2uchar need_return_vel_x;
+  float2uchar need_return_vel_y;
+  float2uchar need_return_vel_z;
   // Send_Data.tx[0]=FRAME_HEADER; //frame head 0x7B //帧头0X7B
   // Send_Data.tx[1] = 0; //set aside //预留位
   // Send_Data.tx[2] = 0; //set aside //预留位
@@ -60,52 +67,24 @@ void turn_on_robot::Cmd_Vel_Callback(const geometry_msgs::Twist &twist_aux)
   // transition = twist_aux.linear.x*1000; //将浮点数放大一千倍，简化传输
   // Send_Data.tx[4] = transition;     //取数据的低8位
   // Send_Data.tx[3] = transition>>8;  //取数据的高8位
-  need_return_vel = twist_aux.linear.x;
-  unsigned char* bytes_ptr_x = reinterpret_cast<unsigned char*>(&need_return_vel);
-  unsigned char bytes[4];
-  for (int i = 0; i < 4; ++i)
-  {
-    bytes[i] = *(bytes_ptr_x + i);
-  }
-  unsigned char byte1 = bytes[0];
-  unsigned char byte2 = bytes[1];
-  unsigned char byte3 = bytes[2];
-  unsigned char byte4 = bytes[3];
-  Send_Data.Tdata[3] = byte1;
-  Send_Data.Tdata[4] = byte2;
-  Send_Data.Tdata[5] = byte3;
-  Send_Data.Tdata[6] = byte4;
+  need_return_vel_x.f = twist_aux.linear.x;
+  Send_Data.Tdata[3] = need_return_vel_x.c[0];
+  Send_Data.Tdata[4] = need_return_vel_x.c[1];
+  Send_Data.Tdata[5] = need_return_vel_x.c[2];
+  Send_Data.Tdata[6] = need_return_vel_x.c[3];
 
-  need_return_vel = twist_aux.linear.y;
-  unsigned char* bytes_ptr_y = reinterpret_cast<unsigned char*>(&need_return_vel);
-  for (int i = 0; i < 4; ++i)
-  {
-    bytes[i] = *(bytes_ptr_y + i);
-  }
-  byte1 = bytes[0];
-  byte2 = bytes[1];
-  byte3 = bytes[2];
-  byte4 = bytes[3];
+  need_return_vel_y.f = twist_aux.linear.y;
   Append_CRC16_Check_Sum(Send_Data.tx , 9);
-  Send_Data.Tdata[9] = byte1;
-  Send_Data.Tdata[10] = byte2;
-  Send_Data.Tdata[11] = byte3;
-  Send_Data.Tdata[12] = byte4;
+  Send_Data.Tdata[9] = need_return_vel_y.c[0];
+  Send_Data.Tdata[10] = need_return_vel_y.c[1];
+  Send_Data.Tdata[11] = need_return_vel_y.c[2];
+  Send_Data.Tdata[12] = need_return_vel_y.c[3];
 
-  need_return_vel = twist_aux.linear.z;
-  unsigned char* bytes_ptr_z = reinterpret_cast<unsigned char*>(&need_return_vel);
-  for (int i = 0; i < 4; ++i)
-  {
-    bytes[i] = *(bytes_ptr_y + i);
-  }
-  byte1 = bytes[0];
-  byte2 = bytes[1];
-  byte3 = bytes[2];
-  byte4 = bytes[3];
-  Send_Data.Tdata[13] = byte1;
-  Send_Data.Tdata[14] = byte2;
-  Send_Data.Tdata[15] = byte3;
-  Send_Data.Tdata[16] = byte4;
+  need_return_vel_z.f = twist_aux.linear.z;
+  Send_Data.Tdata[13] = need_return_vel_z.c[0];
+  Send_Data.Tdata[14] = need_return_vel_z.c[1];
+  Send_Data.Tdata[15] = need_return_vel_z.c[2];
+  Send_Data.Tdata[16] = need_return_vel_z.c[3];
   Append_CRC16_Check_Sum(Send_Data.tx , 19);
   //The target velocity of the Y-axis of the robot
   //机器人y轴的目标线速度
