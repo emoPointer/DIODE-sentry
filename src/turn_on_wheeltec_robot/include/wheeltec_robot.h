@@ -193,7 +193,6 @@ class turn_on_robot
 		serial::Serial Stm32_Serial; //Declare a serial object //声明串口对象 
     	int databits, stopbits, parity;
     	unsigned char rdata[255];                 // raw_data
-    	float quat[4]; //四元数
     	float acc[3]; //加速度
     	float gyro[3]; //角速度
 		float vel[3];
