@@ -707,7 +707,7 @@ turn_on_robot::turn_on_robot():Sampling_Time(0),Power_voltage(0)
   ros::NodeHandle private_nh("~"); //Create a node handle //创建节点句柄
   //The private_nh.param() entry parameter corresponds to the initial value of the name of the parameter variable on the parameter server
   //private_nh.param()入口参数分别对应：参数服务器上的名称  参数变量名  初始值
-  private_nh.param<std::string>("usart_port_name",  usart_port_name,  "/dev/wheeltec_controller"); //Fixed serial port number //固定串口号
+  private_nh.param<std::string>("usart_port_name",  usart_port_name,  "/dev/ttyUSB0"); //Fixed serial port number //固定串口号
   private_nh.param<int>        ("serial_baud_rate", serial_baud_rate, 115200); //Communicate baud rate 115200 to the lower machine //和下位机通信波特率115200
   private_nh.param<std::string>("odom_frame_id",    odom_frame_id,    "odom_combined");      //The odometer topic corresponds to the parent TF coordinate //里程计话题对应父TF坐标
   private_nh.param<std::string>("robot_frame_id",   robot_frame_id,   "base_footprint"); //The odometer topic corresponds to sub-TF coordinates //里程计话题对应子TF坐标
@@ -738,11 +738,12 @@ turn_on_robot::turn_on_robot():Sampling_Time(0),Power_voltage(0)
     Stm32_Serial.setBaudrate(serial_baud_rate); //Set the baud rate //设置波特率
     serial::Timeout _time = serial::Timeout::simpleTimeout(2000); //Timeout //超时等待
     Stm32_Serial.setTimeout(_time);
+    ROS_INFO_STREAM("Stm32_open_success");
     Stm32_Serial.open(); //Open the serial port //开启串口
   }
   catch (serial::IOException& e)
   {
-    ROS_ERROR_STREAM("wheeltec_robot can not open serial port,Please check the serial port cable! "); //If opening the serial port fails, an error message is printed //如果开启串口失败，打印错误信息
+    ROS_ERROR_STREAM("wheeltec_robot can not open Stm32_serial port,Please check the serial port cable!: " << e.what()); //If opening the serial port fails, an error message is printed //如果开启串口失败，打印错误信息
   }
   if(Stm32_Serial.isOpen())
   {
