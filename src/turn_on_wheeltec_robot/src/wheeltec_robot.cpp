@@ -58,9 +58,9 @@ void turn_on_robot::Cmd_Vel_Callback(const geometry_msgs::Twist &twist_aux)
   // Send_Data.tx[0]=FRAME_HEADER; //frame head 0x7B //帧头0X7B
   // Send_Data.tx[1] = 0; //set aside //预留位
   // Send_Data.tx[2] = 0; //set aside //预留位
-  Send_Data.Tdata[0]=FRAME_HEADER; //frame head 0x7B //帧头0X7B
-  Send_Data.Tdata[1] = 0; //set aside //预留位
-  Send_Data.Tdata[2] = 0; //set aside //预留位
+  Send_Data.tx[0]=0x7D; //frame head 0x7B //帧头0X7B
+  Send_Data.tx[1] = 0; //set aside //预留位
+  Send_Data.tx[2] = 0; //set aside //预留位
   //The target velocity of the X-axis of the robot
   //机器人x轴的目标线速度
   //transition=0;
@@ -68,23 +68,23 @@ void turn_on_robot::Cmd_Vel_Callback(const geometry_msgs::Twist &twist_aux)
   // Send_Data.tx[4] = transition;     //取数据的低8位
   // Send_Data.tx[3] = transition>>8;  //取数据的高8位
   need_return_vel_x.f = twist_aux.linear.x;
-  Send_Data.Tdata[3] = need_return_vel_x.c[0];
-  Send_Data.Tdata[4] = need_return_vel_x.c[1];
-  Send_Data.Tdata[5] = need_return_vel_x.c[2];
-  Send_Data.Tdata[6] = need_return_vel_x.c[3];
+  Send_Data.tx[3] = need_return_vel_x.c[0];
+  Send_Data.tx[4] = need_return_vel_x.c[1];
+  Send_Data.tx[5] = need_return_vel_x.c[2];
+  Send_Data.tx[6] = need_return_vel_x.c[3];
 
   need_return_vel_y.f = twist_aux.linear.y;
   Append_CRC16_Check_Sum(Send_Data.tx , 9);
-  Send_Data.Tdata[9] = need_return_vel_y.c[0];
-  Send_Data.Tdata[10] = need_return_vel_y.c[1];
-  Send_Data.Tdata[11] = need_return_vel_y.c[2];
-  Send_Data.Tdata[12] = need_return_vel_y.c[3];
+  Send_Data.tx[9] = need_return_vel_y.c[0];
+  Send_Data.tx[10] = need_return_vel_y.c[1];
+  Send_Data.tx[11] = need_return_vel_y.c[2];
+  Send_Data.tx[12] = need_return_vel_y.c[3];
 
-  need_return_vel_z.f = twist_aux.linear.z;
-  Send_Data.Tdata[13] = need_return_vel_z.c[0];
-  Send_Data.Tdata[14] = need_return_vel_z.c[1];
-  Send_Data.Tdata[15] = need_return_vel_z.c[2];
-  Send_Data.Tdata[16] = need_return_vel_z.c[3];
+  need_return_vel_z.f = twist_aux.angular.z;
+  Send_Data.tx[13] = need_return_vel_z.c[0];
+  Send_Data.tx[14] = need_return_vel_z.c[1];
+  Send_Data.tx[15] = need_return_vel_z.c[2];
+  Send_Data.tx[16] = need_return_vel_z.c[3];
   Append_CRC16_Check_Sum(Send_Data.tx , 19);
   //The target velocity of the Y-axis of the robot
   //机器人y轴的目标线速度
@@ -101,10 +101,17 @@ void turn_on_robot::Cmd_Vel_Callback(const geometry_msgs::Twist &twist_aux)
   // Send_Data.tx[7] = transition>>8;
 
   // Send_Data.tx[9]=Check_Sum(9,SEND_DATA_CHECK); //For the BCC check bits, see the Check_Sum function //BCC校验位，规则参见Check_Sum函数
-  Send_Data.tx[19]=FRAME_TAIL; //frame tail 0x7D //帧尾0X7D
+  Send_Data.tx[19]=0x8c; //frame tail 0x7D //帧尾0X7D
   try
   {
-    Stm32_Serial.write(Send_Data.tx,sizeof (Send_Data.tx)); //Sends data to the downloader via serial port //通过串口向下位机发送数据 
+    int bytes = 0;
+    bytes=Stm32_Serial.write(Send_Data.tx,20); //Sends data to the downloader via serial port //通过串口向下位机发送数据 
+    if(bytes != 0 && need_return_vel_x.f!=0){
+      cout<<"bytes:"<<bytes<<endl;
+      cout<<"velback"<<endl;
+      cout<<need_return_vel_x.f<<endl;
+      printf("0X%x ",Send_Data.tx[19]);
+    }
   }
   catch (serial::IOException& e)   
   {
@@ -532,7 +539,7 @@ bool turn_on_robot::Get_Sensor_Data_New()
   bytes = Stm32_Serial.read(rdata+32,8);
    // printf("0x%02X ", (unsigned char)rdata[0]);
   //cout<<hex<<rdata[0];
-  // printf("0X%x ",rdata[0]);
+  //  printf("0X%x ",rdata[0]);
   // printf("0X%x ",rdata[59]);
     if (rdata[0]==0XA5 && Verify_CRC16_Check_Sum(rdata,39) && rdata[39]==0XB2)
     {
@@ -545,11 +552,11 @@ bool turn_on_robot::Get_Sensor_Data_New()
         // cout<<"Robot_Vel.X:"<<Robot_Vel.X<<endl;
         // cout<<"Robot_Vel.Y:"<<Robot_Vel.Y<<endl;
         // cout<<"Robot_Vel.Z:"<<Robot_Vel.Z<<endl;
-        Mpu6050_Data.gyros_x_data = gyro[0];
-        Mpu6050_Data.gyros_y_data = gyro[1];
+        Mpu6050_Data.gyros_x_data = -gyro[0];
+        Mpu6050_Data.gyros_y_data = -gyro[1];
         Mpu6050_Data.gyros_z_data = gyro[2];
-        Mpu6050_Data.accele_x_data = acc[0];
-        Mpu6050_Data.accele_y_data = acc[1];
+        Mpu6050_Data.accele_x_data = -acc[0];
+        Mpu6050_Data.accele_y_data = -acc[1];
         Mpu6050_Data.accele_z_data = acc[2];
         // cout<<"Robot_gyro_x:"<<gyro[0]<<endl;
         // cout<<"Robot_gyro_y:"<<gyro[1]<<endl;
@@ -569,44 +576,6 @@ bool turn_on_robot::Get_Sensor_Data_New()
       return false;
   }else
     return false;
-}
-bool turn_on_robot::Get_Sensor_Data_New_New()
-{
-  int bytes;
-  bytes = Stm32_Serial.read(rdata,32);
-  bytes = Stm32_Serial.read(rdata+32,26);
-   // printf("0x%02X ", (unsigned char)rdata[0]);
-  // ROS_INFO_STREAM("cd GET_SERIAL");
-    if (rdata[0]==0XA5 && Verify_CRC16_Check_Sum(rdata,39) && rdata[39]==0XB2)
-    {
-        //ROS_INFO_STREAM("CRC right!");
-        getGyro(&rdata[1]);
-        getAcc(&rdata[13]);
-        get_xyspeed_and_z(&rdata[25]);
-        Robot_Vel.X = vel[0];
-        Robot_Vel.Y = vel[1];
-        Robot_Vel.Z = vel[2];
-        // cout<<"Robot_Vel.X:"<<Robot_Vel.X<<endl;
-        // cout<<"Robot_Vel.Y:"<<Robot_Vel.Y<<endl;
-        // cout<<"Robot_Vel.Z:"<<Robot_Vel.Z<<endl;
-        Mpu6050_Data.gyros_x_data = gyro[0];
-        Mpu6050_Data.gyros_y_data = gyro[1];
-        Mpu6050_Data.gyros_z_data = gyro[2];
-        Mpu6050_Data.accele_x_data = acc[0];
-        Mpu6050_Data.accele_y_data = acc[1];
-        Mpu6050_Data.accele_z_data = acc[2];
-        // cout<<"Robot_gyro_x:"<<gyro[0]<<endl;
-        // cout<<"Robot_gyro_y:"<<gyro[1]<<endl;
-        // cout<<"Robot_gyro_z:"<<gyro[2]<<endl;
-        Mpu6050.linear_acceleration.x = Mpu6050_Data.accele_x_data ;
-        Mpu6050.linear_acceleration.y = Mpu6050_Data.accele_y_data ;
-        Mpu6050.linear_acceleration.z = Mpu6050_Data.accele_z_data ;
-        //cout<<"Robot_acc_z:"<<acc[2]<<endl;
-        Mpu6050.angular_velocity.x =  Mpu6050_Data.gyros_x_data ;
-        Mpu6050.angular_velocity.y =  Mpu6050_Data.gyros_y_data ;
-        Mpu6050.angular_velocity.z =  Mpu6050_Data.gyros_z_data ;
-        Power_voltage =22;
-    }
 }
 
 bool turn_on_robot::get_xyspeed_and_z(unsigned char *data)
@@ -669,10 +638,10 @@ bool turn_on_robot::getAcc(unsigned char *data)
 // };
 float turn_on_robot::exchange_data(unsigned char *data,float need_return_float_data)
 {
-    *(uint8_t *)&need_return_float_data = data[0];
-    *((uint8_t *)&need_return_float_data+1) = data[1];
-    *((uint8_t *)&need_return_float_data+2) = data[2];
-    *((uint8_t *)&need_return_float_data+3) = data[3];
+    *((uint8_t *)&need_return_float_data) = data[0];
+    *(((uint8_t *)&need_return_float_data+1)) = data[1];
+    *(((uint8_t *)&need_return_float_data+2)) = data[2];
+    *(((uint8_t *)&need_return_float_data+3)) = data[3];
     return need_return_float_data;
 };
 /**************************************
@@ -755,7 +724,7 @@ turn_on_robot::turn_on_robot():Sampling_Time(0),Power_voltage(0)
 
 
   voltage_publisher = n.advertise<std_msgs::Float32>("PowerVoltage", 10); //Create a battery-voltage topic publisher //创建电池电压话题发布者
-  odom_publisher    = n.advertise<nav_msgs::Odometry>("odom", 20); //Create the odometer topic publisher //创建里程计话题发布者
+  odom_publisher    = n.advertise<nav_msgs::Odometry>("odom", 50); //Create the odometer topic publisher //创建里程计话题发布者
   imu_publisher     = n.advertise<sensor_msgs::Imu>("imu", 20); //Create an IMU topic publisher //创建IMU话题发布者
 
   //Set the velocity control command callback function

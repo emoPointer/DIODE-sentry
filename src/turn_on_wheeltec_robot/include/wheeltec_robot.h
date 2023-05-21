@@ -32,7 +32,7 @@ using namespace std;
 #define FRAME_HEADER      0X7B       //Frame head //帧头
 #define FRAME_TAIL        0X7D       //Frame tail //帧尾
 #define RECEIVE_DATA_SIZE 60	//原本为24         //The length of the data sent by the lower computer //下位机发送过来的数据的长度
-#define SEND_DATA_SIZE    19   //原本为11      //The length of data sent by ROS to the lower machine //ROS向下位机发送的数据的长度
+#define SEND_DATA_SIZE    20   //原本为11      //The length of data sent by ROS to the lower machine //ROS向下位机发送的数据的长度
 #define PI 				  3.1415926f //PI //圆周率
 
 //Relative to the range set by the IMU gyroscope, the range is ±500°, corresponding data range is ±32768
@@ -212,7 +212,6 @@ class turn_on_robot
 		void Publish_Odom();      //Pub the speedometer topic //发布里程计话题
 		void Publish_ImuSensor(); //Pub the IMU sensor topic //发布IMU传感器话题
 		void Publish_Voltage();   //Pub the power supply voltage topic //发布电源电压话题
-		bool getQuat(unsigned char *data);
 		bool getGyro(unsigned char *data);
 		bool getAcc(unsigned char *data);
 		bool get_xyspeed_and_z(unsigned char *data);
@@ -222,7 +221,6 @@ class turn_on_robot
         //Read motion chassis speed, IMU, power supply voltage data from serial port (ttyUSB)
         bool Get_Sensor_Data();   
 		bool Get_Sensor_Data_New();
-		bool Get_Sensor_Data_New_New();
         unsigned char Check_Sum(unsigned char Count_Number,unsigned char mode); //BBC check function //BBC校验函数
 		uint16_t Get_CRC16_Check_Sum(uint8_t *pchMessage, uint32_t dwLength, uint16_t wCRC);//CRC
 		void Append_CRC16_Check_Sum(uint8_t *pchMessage, uint32_t dwLength);//CRC校验
