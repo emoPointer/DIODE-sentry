@@ -1,0 +1,7 @@
+"Could NOT find SDL (missing: SDL_LIBRARY SDL_INCLUDE_DIR)":sudo apt-get install libsdl-image1.2-dev&&sudo apt-get install libsdl-dev
+直接运行 rosdep install --from-paths src --ignore-src -r -y
+"No package 'orocos-bfl' found"：melodic:sudo apt-get install ros-melodic-bfl
+				  noetic:sudo apt install liborocos-bfl-dev
+"Could NOT find joy (missing: joy_DIR)
+-- Could not find the required component 'joy'. The following CMake error indicates that you either need to install the package with the same name or change your environment so that it can be found.":sudo apt-get install ros-<>-joy* 在不行删除cmakeLists.txt中的joy
+"fatal error: /usr/include/opencv2/imgproc/types_c.h: No such file or directory":改绝对路径

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(wheeltec_robot_rc)
 
 ## Find catkin macros and libraries
-find_package(catkin REQUIRED COMPONENTS roscpp geometry_msgs joy)
+find_package(catkin REQUIRED COMPONENTS roscpp geometry_msgs )
 
 include_directories(${catkin_INCLUDE_DIRS})
 
