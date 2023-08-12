@@ -204,10 +204,11 @@ class turn_on_robot
 		float Sampling_Time;         //Sampling time, used for integration to find displacement (mileage) //采样时间，用于积分求位移(里程)
 
 		ros::Subscriber Cmd_Vel_Sub; //Initialize the topic subscriber //初始化话题订阅者
+		ros::Subscriber imu_sub;
 		//The speed topic subscribes to the callback function
 		//速度话题订阅回调函数
 		void Cmd_Vel_Callback(const geometry_msgs::Twist &twist_aux);              
-
+		void imuCallback(const sensor_msgs::Imu::ConstPtr& imu_msg);
 		ros::Publisher odom_publisher, imu_publisher, voltage_publisher; //Initialize the topic publisher //初始化话题发布者
 		void Publish_Odom();      //Pub the speedometer topic //发布里程计话题
 		void Publish_ImuSensor(); //Pub the IMU sensor topic //发布IMU传感器话题

@@ -1,0 +1,42 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/dhu/DIODE-sentry/devel/include/**",
+        "/opt/ros/noetic/include/**",
+        "/home/dhu/DIODE-sentry/src/navigation-melodic/amcl/include/**",
+        "/home/dhu/DIODE-sentry/src/navigation-melodic/base_local_planner/include/**",
+        "/home/dhu/DIODE-sentry/src/navigation-melodic/carrot_planner/include/**",
+        "/home/dhu/DIODE-sentry/src/navigation-melodic/clear_costmap_recovery/include/**",
+        "/home/dhu/DIODE-sentry/src/navigation-melodic/costmap_2d/include/**",
+        "/home/dhu/DIODE-sentry/src/depthimage_to_laserscan-melodic-devel/include/**",
+        "/home/dhu/DIODE-sentry/src/navigation-melodic/dwa_local_planner/include/**",
+        "/home/dhu/DIODE-sentry/src/fdilink_ahrs/include/**",
+        "/home/dhu/DIODE-sentry/src/navigation-melodic/global_planner/include/**",
+        "/home/dhu/DIODE-sentry/src/navigation-melodic/map_server/include/**",
+        "/home/dhu/DIODE-sentry/src/navigation-melodic/move_base/include/**",
+        "/home/dhu/DIODE-sentry/src/navigation-melodic/move_slow_and_clear/include/**",
+        "/home/dhu/DIODE-sentry/src/navigation-melodic/nav_core/include/**",
+        "/home/dhu/DIODE-sentry/src/navigation-melodic/navfn/include/**",
+        "/home/dhu/DIODE-sentry/src/slam_karto/open_karto-melodic-devel/include/**",
+        "/home/dhu/DIODE-sentry/src/robot_pose_ekf/include/**",
+        "/home/dhu/DIODE-sentry/src/navigation-melodic/rotate_recovery/include/**",
+        "/home/dhu/DIODE-sentry/src/slam_karto/sparse_bundle_adjustment-melodic-devel/include/**",
+        "/home/dhu/DIODE-sentry/src/teb_local_planner-melodic-devel/include/**",
+        "/home/dhu/DIODE-sentry/src/turn_on_wheeltec_robot/include/**",
+        "/home/dhu/DIODE-sentry/src/navigation-melodic/voxel_grid/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

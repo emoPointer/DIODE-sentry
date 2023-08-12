@@ -40,10 +40,10 @@
   <!-- car_mode and tf  mini_mec-->
   <group if="$(eval car_mode == 'mini_mec')">
       <!-- 用于雷达节点，后面同理不再赘述-->
-      <node pkg="tf" type="static_transform_publisher" name="base_to_laser" args="0.06 0.00 0.20 3.14 0 0  base_footprint laser 100" />
+      <node pkg="tf" type="static_transform_publisher" name="base_to_laser" args="0.13 0.18 0.80 0 0 0  base_footprint laser 100" />
       <!-- 用于摄像头相关节点，如3d建图导航，后面同理不再赘述-->
       <node pkg="tf" type="static_transform_publisher" name="base_to_camera" args="0.12 0 0.15 0 0 0   base_footprint camera_link 100" />
-      <node pkg="tf" type="static_transform_publisher" name="base_to_gyro" args="0 0 0 0 0 0 base_footprint gyro_link 100" />
+      <node pkg="tf" type="static_transform_publisher" name="base_to_gyro" args="-0.04 0.14 0.04 0 0 0 base_footprint gyro_link 100" />
   </group>
   <!-- car_mode and tf  mini_mec_moveit-->
   <group if="$(eval car_mode == 'mini_mec_moveit_four')">
@@ -52,7 +52,7 @@
       <node pkg="tf" type="static_transform_publisher" name="base_to_laser" args="0.048 0.00 0.18 3.14 0 0  base_footprint laser 100" /> <!--A1 laser-->
       <!-- 用于摄像头相关节点，如3d建图导航，后面同理不再赘述-->
       <node pkg="tf" type="static_transform_publisher" name="base_to_camera" args="-0.118 0 0.50 0 0 0   base_footprint camera_link 100" />
-      <node pkg="tf" type="static_transform_publisher" name="base_to_gyro" args="0 0 0 0 0 0 base_footprint gyro_link 100" />
+      <node pkg="tf" type="static_transform_publisher" name="base_to_gyro" args="-0.04 0.14 0.04 0 0 0 base_footprint gyro_link 100" />
   </group>
     <group if="$(eval car_mode == 'mini_mec_moveit_six')">
       <!-- 用于雷达节点，后面同理不再赘述-->

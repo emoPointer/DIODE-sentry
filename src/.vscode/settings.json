@@ -1,0 +1,37 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/dhu/DIODE-sentry/devel/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages",
+        "/opt/intel/openvino_2021/python/python3.8",
+        "/opt/intel/openvino_2021/python/python3",
+        "/opt/intel/openvino_2021/deployment_tools/tools/post_training_optimization_toolkit",
+        "/opt/intel/openvino_2021/deployment_tools/open_model_zoo/tools/accuracy_checker",
+        "/opt/intel/openvino_2021/deployment_tools/model_optimizer",
+        "/opt/intel/openvino_2021/data_processing/dl_streamer/python",
+        "/opt/intel/openvino_2021/data_processing/gstreamer/lib/python3.8/site-packages"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/dhu/DIODE-sentry/devel/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages",
+        "/opt/intel/openvino_2021/python/python3.8",
+        "/opt/intel/openvino_2021/python/python3",
+        "/opt/intel/openvino_2021/deployment_tools/tools/post_training_optimization_toolkit",
+        "/opt/intel/openvino_2021/deployment_tools/open_model_zoo/tools/accuracy_checker",
+        "/opt/intel/openvino_2021/deployment_tools/model_optimizer",
+        "/opt/intel/openvino_2021/data_processing/dl_streamer/python",
+        "/opt/intel/openvino_2021/data_processing/gstreamer/lib/python3.8/site-packages"
+    ],
+    "files.associations": {
+        "*.ipp": "cpp",
+        "*.tcc": "cpp",
+        "bitset": "cpp",
+        "optional": "cpp",
+        "algorithm": "cpp",
+        "random": "cpp",
+        "istream": "cpp",
+        "numeric": "cpp",
+        "streambuf": "cpp",
+        "valarray": "cpp",
+        "tuple": "cpp"
+    }
+}

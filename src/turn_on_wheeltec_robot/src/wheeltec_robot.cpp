@@ -44,6 +44,19 @@ typedef union
     float f;
     unsigned char c[4];
 } float2uchar;
+void imuCallback(const sensor_msgs::Imu::ConstPtr& imu_msg){
+
+  Mpu6050.orientation.x=imu_msg->orientation.x;
+  Mpu6050.orientation.y=imu_msg->orientation.y;
+  Mpu6050.orientation.z=imu_msg->orientation.z;
+  Mpu6050.angular_velocity.x=imu_msg->angular_velocity.x;
+  Mpu6050.angular_velocity.y=imu_msg->angular_velocity.y;
+  Mpu6050.angular_velocity.z=imu_msg->angular_velocity.z;
+  Mpu6050.linear_acceleration.x=imu_msg->linear_acceleration.x;
+  Mpu6050.linear_acceleration.y=imu_msg->linear_acceleration.y;
+  Mpu6050.linear_acceleration.z=imu_msg->linear_acceleration.z;
+
+}
 /**************************************
 Date: January 28, 2021
 Function: The speed topic subscription Callback function, according to the subscribed instructions through the serial port command control of the lower computer
@@ -446,99 +459,13 @@ Function: Read and verify the data sent by the lower computer frame by frame thr
 ***************************************/
 bool turn_on_robot::Get_Sensor_Data_New()
 {
-  // ROS_INFO_STREAM("CRC right!");
-  // short transition_16=0; //Intermediate variable //中间变量
-  // uint8_t i=0,check=0, error=1,Receive_Data_Pr[1]; //Temporary variable to save the data of the lower machine //临时变量，保存下位机数据
-  // static int count; //Static variable for counting //静态变量，用于计数
-  // Stm32_Serial.read(Receive_Data_Pr,sizeof(Receive_Data_Pr)); //Read the data sent by the lower computer through the serial port //通过串口读取下位机发送过来的数据
-
-  // /*//View the received raw data directly and debug it for use//直接查看接收到的原始数据，调试使用
-  // ROS_INFO("%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x",
-  // Receive_Data_Pr[0],Receive_Data_Pr[1],Receive_Data_Pr[2],Receive_Data_Pr[3],Receive_Data_Pr[4],Receive_Data_Pr[5],Receive_Data_Pr[6],Receive_Data_Pr[7],
-  // Receive_Data_Pr[8],Receive_Data_Pr[9],Receive_Data_Pr[10],Receive_Data_Pr[11],Receive_Data_Pr[12],Receive_Data_Pr[13],Receive_Data_Pr[14],Receive_Data_Pr[15],
-  // Receive_Data_Pr[16],Receive_Data_Pr[17],Receive_Data_Pr[18],Receive_Data_Pr[19],Receive_Data_Pr[20],Receive_Data_Pr[21],Receive_Data_Pr[22],Receive_Data_Pr[23]);
-  // */  
-
-  // Receive_Data.rx[count] = Receive_Data_Pr[0]; //Fill the array with serial data //串口数据填入数组
-
-  // Receive_Data.Frame_Header = Receive_Data.rx[0]; //The first part of the data is the frame header 0X7B //数据的第一位是帧头0X7B
-  // Receive_Data.Frame_Tail = Receive_Data.rx[23];  //The last bit of data is frame tail 0X7D //数据的最后一位是帧尾0X7D
-
-  // if(Receive_Data_Pr[0] == FRAME_HEADER || count>0) //Ensure that the first data in the array is FRAME_HEADER //确保数组第一个数据为FRAME_HEADER
-  //   count++;
-  // else 
-  // 	count=0;
-  // if(count == 24) //Verify the length of the packet //验证数据包的长度
-  // {
-  //   count=0;  //Prepare for the serial port data to be refill into the array //为串口数据重新填入数组做准备
-  //   if(Receive_Data.Frame_Tail == FRAME_TAIL) //Verify the frame tail of the packet //验证数据包的帧尾
-  //   {
-  //     check=Check_Sum(22,READ_DATA_CHECK);  //BCC check passes or two packets are interlaced //BCC校验通过或者两组数据包交错
-
-  //     if(check == Receive_Data.rx[22])  
-  //     {
-  //       error=0;  //XOR bit check successful //异或位校验成功
-  //     }
-  //     if(error == 0)
-  //     {
-  //       /*//Check receive_data.rx for debugging use //查看Receive_Data.rx，调试使用 
-  //       ROS_INFO("%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x-%x",
-  //       Receive_Data.rx[0],Receive_Data.rx[1],Receive_Data.rx[2],Receive_Data.rx[3],Receive_Data.rx[4],Receive_Data.rx[5],Receive_Data.rx[6],Receive_Data.rx[7],
-  //       Receive_Data.rx[8],Receive_Data.rx[9],Receive_Data.rx[10],Receive_Data.rx[11],Receive_Data.rx[12],Receive_Data.rx[13],Receive_Data.rx[14],Receive_Data.rx[15],
-  //       Receive_Data.rx[16],Receive_Data.rx[17],Receive_Data.rx[18],Receive_Data.rx[19],Receive_Data.rx[20],Receive_Data.rx[21],Receive_Data.rx[22],Receive_Data.rx[23]); 
-  //       */
-
-  //       Receive_Data.Flag_Stop=Receive_Data.rx[1]; //set aside //预留位
-  //       Robot_Vel.X = Odom_Trans(Receive_Data.rx[2],Receive_Data.rx[3]); //Get the speed of the moving chassis in the X direction //获取运动底盘X方向速度
-          
-  //       Robot_Vel.Y = Odom_Trans(Receive_Data.rx[4],Receive_Data.rx[5]); //Get the speed of the moving chassis in the Y direction, The Y speed is only valid in the omnidirectional mobile robot chassis
-  //                                                                         //获取运动底盘Y方向速度，Y速度仅在全向移动机器人底盘有效
-  //       Robot_Vel.Z = Odom_Trans(Receive_Data.rx[6],Receive_Data.rx[7]); //Get the speed of the moving chassis in the Z direction //获取运动底盘Z方向速度   
-          
-  //       //MPU6050 stands for IMU only and does not refer to a specific model. It can be either MPU6050 or MPU9250
-  //       //Mpu6050仅代表IMU，不指代特定型号，既可以是MPU6050也可以是MPU9250
-  //       Mpu6050_Data.accele_x_data = IMU_Trans(Receive_Data.rx[8],Receive_Data.rx[9]);   //Get the X-axis acceleration of the IMU     //获取IMU的X轴加速度  
-  //       Mpu6050_Data.accele_y_data = IMU_Trans(Receive_Data.rx[10],Receive_Data.rx[11]); //Get the Y-axis acceleration of the IMU     //获取IMU的Y轴加速度
-  //       Mpu6050_Data.accele_z_data = IMU_Trans(Receive_Data.rx[12],Receive_Data.rx[13]); //Get the Z-axis acceleration of the IMU     //获取IMU的Z轴加速度
-  //       Mpu6050_Data.gyros_x_data = IMU_Trans(Receive_Data.rx[14],Receive_Data.rx[15]);  //Get the X-axis angular velocity of the IMU //获取IMU的X轴角速度  
-  //       Mpu6050_Data.gyros_y_data = IMU_Trans(Receive_Data.rx[16],Receive_Data.rx[17]);  //Get the Y-axis angular velocity of the IMU //获取IMU的Y轴角速度  
-  //       Mpu6050_Data.gyros_z_data = IMU_Trans(Receive_Data.rx[18],Receive_Data.rx[19]);  //Get the Z-axis angular velocity of the IMU //获取IMU的Z轴角速度  
-  //       //Linear acceleration unit conversion is related to the range of IMU initialization of STM32, where the range is ±2g=19.6m/s^2
-  //       //线性加速度单位转化，和STM32的IMU初始化的时候的量程有关,这里量程±2g=19.6m/s^2
-  //       Mpu6050.linear_acceleration.x = Mpu6050_Data.accele_x_data / ACCEl_RATIO;
-  //       Mpu6050.linear_acceleration.y = Mpu6050_Data.accele_y_data / ACCEl_RATIO;
-  //       Mpu6050.linear_acceleration.z = Mpu6050_Data.accele_z_data / ACCEl_RATIO;
-  //       //The gyroscope unit conversion is related to the range of STM32's IMU when initialized. Here, the range of IMU's gyroscope is ±500°/s
-  //       //Because the robot generally has a slow Z-axis speed, reducing the range can improve the accuracy
-  //       //陀螺仪单位转化，和STM32的IMU初始化的时候的量程有关，这里IMU的陀螺仪的量程是±500°/s
-  //       //因为机器人一般Z轴速度不快，降低量程可以提高精度
-  //       Mpu6050.angular_velocity.x =  Mpu6050_Data.gyros_x_data * GYROSCOPE_RATIO;
-  //       Mpu6050.angular_velocity.y =  Mpu6050_Data.gyros_y_data * GYROSCOPE_RATIO;
-  //       Mpu6050.angular_velocity.z =  Mpu6050_Data.gyros_z_data * GYROSCOPE_RATIO;
-
-  //       //Get the battery voltage
-  //       //获取电池电压
-  //       transition_16 = 0;
-  //       transition_16 |=  Receive_Data.rx[20]<<8;
-  //       transition_16 |=  Receive_Data.rx[21];  
-  //       Power_voltage = transition_16/1000+(transition_16 % 1000)*0.001; //Unit conversion millivolt(mv)->volt(v) //单位转换毫伏(mv)->伏(v)
-          
-  //       return true;
-
-  //     }
-      
-  //   }
-
-  // }
-  // return false;
-
   int bytes;
   bytes = Stm32_Serial.read(rdata,1);
   if(rdata[0]==0XA5){
   bytes = Stm32_Serial.read(rdata+1,31);
   bytes = Stm32_Serial.read(rdata+32,8);
-   // printf("0x%02X ", (unsigned char)rdata[0]);
-  //cout<<hex<<rdata[0];
+  //  printf("0x%02X ", (unsigned char)rdata[0]);
+  // cout<<hex<<rdata[0];
   //  printf("0X%x ",rdata[0]);
   // printf("0X%x ",rdata[59]);
     if (rdata[0]==0XA5 && Verify_CRC16_Check_Sum(rdata,39) && rdata[39]==0XB2)
@@ -679,17 +606,17 @@ void turn_on_robot::Control()
 
       //Calculate the three-axis attitude from the IMU with the angular velocity around the three-axis and the three-axis acceleration
       //通过IMU绕三轴角速度与三轴加速度计算三轴姿态
-      Quaternion_Solution(Mpu6050.angular_velocity.x, Mpu6050.angular_velocity.y, Mpu6050.angular_velocity.z,\
+      Quaternion_Solution(Mpu6050.angular_velocity.x, Mpu6050.angular_velocity.y, Mpu6050.angular_velocity.z,
                 Mpu6050.linear_acceleration.x, Mpu6050.linear_acceleration.y, Mpu6050.linear_acceleration.z);
       Publish_Odom();      //Pub the speedometer topic //发布里程计话题
       Publish_ImuSensor(); //Pub the IMU topic //发布IMU话题    
-      Publish_Voltage();   //Pub the topic of power supply voltage //发布电源电压话题
+      // Publish_Voltage();   //Pub the topic of power supply voltage //发布电源电压话题
 
       _Last_Time = _Now; //Record the time and use it to calculate the time interval //记录时间，用于计算时间间隔
     }
     
     ros::spinOnce();   //The loop waits for the callback function //循环等待回调函数
-    }
+  }
 }
 /**************************************
 Date: January 28, 2021
@@ -730,7 +657,7 @@ turn_on_robot::turn_on_robot():Sampling_Time(0),Power_voltage(0)
   //Set the velocity control command callback function
   //速度控制命令订阅回调函数设置
   Cmd_Vel_Sub     = n.subscribe("cmd_vel",     100, &turn_on_robot::Cmd_Vel_Callback, this); 
-
+  imu_sub = n.subscribe("/livox/imu", 1, &turn_on_robot::imuCallback, this);
   ROS_INFO_STREAM("Data ready"); //Prompt message //提示信息
   
   try
