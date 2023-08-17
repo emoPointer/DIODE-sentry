@@ -1,22 +1,22 @@
 1.键盘控制
 //需要先开启初始化节点（仅在单独开启键盘控制时需要开启 运行功能时已包括初始化节点 不需要重复开启）
-roslaunch turn_on_wheeltec_robot turn_on_wheeltec_robot.launch
+roslaunch turn_on_diode_robot turn_on_diode_robot.launch
 //开启键盘控制节点
-roslaunch wheeltec_robot_rc keyboard_teleop.launch
+roslaunch diode_robot_rc keyboard_teleop.launch
 
 5.2D建图、2D导航。
-roslaunch turn_on_wheeltec_robot mapping.launch 
-roslaunch turn_on_wheeltec_robot navigation.launch 
-一键保存地图(WHEELTEC.pgm、WHEELTEC.yaml)
-roslaunch turn_on_wheeltec_robot map_saver.launch 
+roslaunch turn_on_diode_robot mapping.launch 
+roslaunch turn_on_diode_robot navigation.launch 
+一键保存地图(diode.pgm、diode.yaml)
+roslaunch turn_on_diode_robot map_saver.launch 
 
 6.3D建图、3D导航。
-roslaunch turn_on_wheeltec_robot 3d_mapping.launch 
-roslaunch turn_on_wheeltec_robot 3d_navigation.launch 
+roslaunch turn_on_diode_robot 3d_mapping.launch 
+roslaunch turn_on_diode_robot 3d_navigation.launch 
 
 10.自主建图 详见自主建图功能教程
 //启动rrt_slam.launch文件：
-roslaunch turn_on_wheeltec_robot rrt_slam.launch
+roslaunch turn_on_diode_robot rrt_slam.launch
 //打开rviz，点击左下方“add”→“by topic”增加配置插件：
 clicked_point	显示随机数的范围点和起点
 detected_points	检测到的边界点
@@ -46,23 +46,23 @@ catkin_make -DCATKIN_WHITELIST_PACKAGES=""
 pip install -i https://pypi.doubanio.com/simple/ python包名
 
 ssh登录：
-ssh -Y wheeltec@192.168.0.100
+ssh -Y diode@192.168.0.100
 
 nfs挂载:
-sudo mount -t nfs 192.168.0.100:/home/wheeltec/wheeltec_robot /mnt
+sudo mount -t nfs 192.168.0.100:/home/diode/diode_robot /mnt
 nfs解除挂载:
-sudo umount -t nfs 192.168.0.100:/home/wheeltec/wheeltec_robot /mnt
+sudo umount -t nfs 192.168.0.100:/home/diode/diode_robot /mnt
 
 给文件夹下的所有文件可执行权限：
 sudo chmod -R 777 文件夹
 
 打开地图路径：
-cd /home/wheeltec/wheeltec_robot/src/turn_on_wheeltec_robot/map
+cd /home/diode/diode_robot/src/turn_on_diode_robot/map
 手动保存地图：
 rosrun map_server map_saver -f 20220615
 
 打开摄像头并使用rqt工具查看图像话题：
-roslaunch turn_on_wheeltec_robot wheeltec_camera.launch
+roslaunch turn_on_diode_robot diode_camera.launch
 rqt_image_view
 
 查看节点与话题关系

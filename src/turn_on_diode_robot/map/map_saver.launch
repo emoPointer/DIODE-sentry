@@ -1,0 +1,4 @@
+<launch>
+	<node pkg="map_server" type="map_saver" name="map_saver1" args="-f /home/dhu/DIODE-sentry/src/turn_on_diode_robot/map/sys" output="screen">	
+	</node>
+</launch>

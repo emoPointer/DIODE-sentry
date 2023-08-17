@@ -1,6 +1,6 @@
 <launch>
-  <include file="$(find turn_on_wheeltec_robot)/launch/turn_on_wheeltec_robot.launch" />
-  <include file="$(find turn_on_wheeltec_robot)/launch/wheeltec_camera.launch" />
+  <include file="$(find turn_on_diode_robot)/launch/turn_on_diode_robot.launch" />
+  <include file="$(find turn_on_diode_robot)/launch/diode_camera.launch" />
   <node name='imageResize' pkg="kcf_track" type="imageResize.py">
   </node>
   <node name='kcf_tracker'     pkg="kcf_track" type="kcf_node">

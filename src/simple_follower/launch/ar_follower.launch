@@ -5,7 +5,7 @@
     
   </node>
   <!-- 开启摄像头 -->
-    <include file="$(find turn_on_wheeltec_robot)/launch/wheeltec_camera.launch" />
+    <include file="$(find turn_on_diode_robot)/launch/diode_camera.launch" />
 	<arg name="marker_size" default="7" />
 	<arg name="max_new_marker_error" default="0.08" />
 	<arg name="max_track_error" default="0.2" />
@@ -25,7 +25,7 @@
 		<remap from="camera_info"   to="$(arg cam_info_topic)" />
 	</node>
   <!-- 开启机器人底层相关节点  -->
-  <include file="$(find turn_on_wheeltec_robot)/launch/turn_on_wheeltec_robot.launch" />
+  <include file="$(find turn_on_diode_robot)/launch/turn_on_diode_robot.launch" />
   
 </launch>
 

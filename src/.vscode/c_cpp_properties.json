@@ -27,7 +27,7 @@
         "/home/dhu/DIODE-sentry/src/navigation-melodic/rotate_recovery/include/**",
         "/home/dhu/DIODE-sentry/src/slam_karto/sparse_bundle_adjustment-melodic-devel/include/**",
         "/home/dhu/DIODE-sentry/src/teb_local_planner-melodic-devel/include/**",
-        "/home/dhu/DIODE-sentry/src/turn_on_wheeltec_robot/include/**",
+        "/home/dhu/DIODE-sentry/src/turn_on_diode_robot/include/**",
         "/home/dhu/DIODE-sentry/src/navigation-melodic/voxel_grid/include/**",
         "/usr/include/**"
       ],

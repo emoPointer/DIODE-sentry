@@ -4,7 +4,7 @@
     <param name="debug"  value="false"/>
     
     <!-- 串口设备名称 -->
-    <param name="port"  value="/dev/wheeltec_FDI_IMU_GNSS"/>
+    <param name="port"  value="/dev/diode_FDI_IMU_GNSS"/>
 
     <!-- 波特率 -->
     <param name="baud"  value="921600"/>
