@@ -1,6 +1,6 @@
 
 <launch>
-  <arg name="mapping_mode"  default="karto" doc="opt: gmapping,hector,cartographer,karto"/>
+  <arg name="mapping_mode"  default="gmapping" doc="opt: gmapping,hector,cartographer,karto"/>
   
   <!-- 是否在建图时开启导航 默认不开启 仅在rrt自主建图时同时进行-->
   <arg name="navigation" default="false"/>
@@ -21,6 +21,7 @@
     <arg name="is_cartographer" value="false"/>
     <arg name="odom_frame_id"   value="$(arg odom_frame_id)"/>
   </include>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find turn_on_wheeltec_robot)/rviz/mapping.rviz" />
   </group>
 
   <!-- 开启hector建图算法  -->
@@ -32,6 +33,7 @@
     <arg name="is_cartographer" value="false"/>
     <arg name="odom_frame_id"   value="$(arg odom_frame_id)"/>
   </include>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find turn_on_wheeltec_robot)/rviz/mapping.rviz" />
   </group> 
 
    <!-- 开启karto建图算法  -->
@@ -43,6 +45,7 @@
     <arg name="is_cartographer" value="false"/>
     <arg name="odom_frame_id"   value="$(arg odom_frame_id)"/>
   </include>
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find turn_on_wheeltec_robot)/rviz/mapping.rviz" />
   </group>  
 
    <!-- 开启cartographer建图算法  -->

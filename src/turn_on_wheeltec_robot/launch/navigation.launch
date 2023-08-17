@@ -18,6 +18,7 @@
  <!-- MarkerArray功能节点> -->
  <node name='send_mark' pkg="turn_on_wheeltec_robot" type="send_mark.py">
  </node>
+ <node name="rviz" pkg="rviz" type="rviz" args="-d $(find turn_on_wheeltec_robot)/rviz/nagavition.rviz" />
 
 </launch>
 

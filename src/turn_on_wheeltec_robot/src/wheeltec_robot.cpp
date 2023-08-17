@@ -44,19 +44,6 @@ typedef union
     float f;
     unsigned char c[4];
 } float2uchar;
-void imuCallback(const sensor_msgs::Imu::ConstPtr& imu_msg){
-
-  Mpu6050.orientation.x=imu_msg->orientation.x;
-  Mpu6050.orientation.y=imu_msg->orientation.y;
-  Mpu6050.orientation.z=imu_msg->orientation.z;
-  Mpu6050.angular_velocity.x=imu_msg->angular_velocity.x;
-  Mpu6050.angular_velocity.y=imu_msg->angular_velocity.y;
-  Mpu6050.angular_velocity.z=imu_msg->angular_velocity.z;
-  Mpu6050.linear_acceleration.x=imu_msg->linear_acceleration.x;
-  Mpu6050.linear_acceleration.y=imu_msg->linear_acceleration.y;
-  Mpu6050.linear_acceleration.z=imu_msg->linear_acceleration.z;
-
-}
 /**************************************
 Date: January 28, 2021
 Function: The speed topic subscription Callback function, according to the subscribed instructions through the serial port command control of the lower computer
@@ -80,13 +67,13 @@ void turn_on_robot::Cmd_Vel_Callback(const geometry_msgs::Twist &twist_aux)
   // transition = twist_aux.linear.x*1000; //将浮点数放大一千倍，简化传输
   // Send_Data.tx[4] = transition;     //取数据的低8位
   // Send_Data.tx[3] = transition>>8;  //取数据的高8位
-  need_return_vel_x.f = twist_aux.linear.x;
+  need_return_vel_x.f = twist_aux.linear.x*100;
   Send_Data.tx[3] = need_return_vel_x.c[0];
   Send_Data.tx[4] = need_return_vel_x.c[1];
   Send_Data.tx[5] = need_return_vel_x.c[2];
   Send_Data.tx[6] = need_return_vel_x.c[3];
 
-  need_return_vel_y.f = twist_aux.linear.y;
+  need_return_vel_y.f = twist_aux.linear.y*100;
   Append_CRC16_Check_Sum(Send_Data.tx , 9);
   Send_Data.tx[9] = need_return_vel_y.c[0];
   Send_Data.tx[10] = need_return_vel_y.c[1];
@@ -120,10 +107,12 @@ void turn_on_robot::Cmd_Vel_Callback(const geometry_msgs::Twist &twist_aux)
     int bytes = 0;
     bytes=Stm32_Serial.write(Send_Data.tx,20); //Sends data to the downloader via serial port //通过串口向下位机发送数据 
     if(bytes != 0 && need_return_vel_x.f!=0){
-      cout<<"bytes:"<<bytes<<endl;
-      cout<<"velback"<<endl;
-      cout<<need_return_vel_x.f<<endl;
-      printf("0X%x ",Send_Data.tx[19]);
+      // cout<<"bytes:"<<bytes<<endl;
+      cout<<"velback_x:"<<need_return_vel_x.f<<endl;
+      cout<<"velback_y:"<<need_return_vel_y.f<<endl;
+      cout<<"velback_z:"<<need_return_vel_z.f<<endl;
+      // cout<<need_return_vel_x.f<<endl;
+      // printf("0X%x ",Send_Data.tx[19]);
     }
   }
   catch (serial::IOException& e)   
@@ -484,10 +473,11 @@ bool turn_on_robot::Get_Sensor_Data_New()
         Mpu6050_Data.gyros_z_data = gyro[2];
         Mpu6050_Data.accele_x_data = -acc[0];
         Mpu6050_Data.accele_y_data = -acc[1];
-        Mpu6050_Data.accele_z_data = acc[2];
-        // cout<<"Robot_gyro_x:"<<gyro[0]<<endl;
-        // cout<<"Robot_gyro_y:"<<gyro[1]<<endl;
-        // cout<<"Robot_gyro_z:"<<gyro[2]<<endl;
+        Mpu6050_Data.accele_z_data = -acc[2];
+        // Mpu6050_Data.gyros_x_data = 0;?
+        // cout<<"Robot_gyro_x:"<<gyro[0]*57.3<<endl;
+        // cout<<"Robot_gyro_y:"<<gyro[1]*57.3<<endl;
+        // cout<<"Robot_gyro_z:"<<gyro[2]*57.3<<endl;
         Mpu6050.linear_acceleration.x = Mpu6050_Data.accele_x_data ;
         Mpu6050.linear_acceleration.y = Mpu6050_Data.accele_y_data ;
         Mpu6050.linear_acceleration.z = Mpu6050_Data.accele_z_data ;
@@ -579,7 +569,8 @@ Function: Loop access to the lower computer data and issue topics
 void turn_on_robot::Control()
 {
   while(ros::ok())
-  {
+  { 
+    
     if (true == Get_Sensor_Data_New()) //The serial port reads and verifies the data sent by the lower computer, and then the data is converted to international units
                                        //通过串口读取并校验下位机发送过来的数据，然后数据转换为国际单位
     {
@@ -603,13 +594,13 @@ void turn_on_robot::Control()
       Robot_Pos.X+=(Robot_Vel.X * cos(Robot_Pos.Z) - Robot_Vel.Y * sin(Robot_Pos.Z)) * Sampling_Time; //Calculate the displacement in the X direction, unit: m //计算X方向的位移，单位：m
       Robot_Pos.Y+=(Robot_Vel.X * sin(Robot_Pos.Z) + Robot_Vel.Y * cos(Robot_Pos.Z)) * Sampling_Time; //Calculate the displacement in the Y direction, unit: m //计算Y方向的位移，单位：m
       Robot_Pos.Z+=Robot_Vel.Z * Sampling_Time; //The angular displacement about the Z axis, in rad //绕Z轴的角位移，单位：rad 
-
+      // cout<<"Robot_Pos.Z"<<Robot_Pos.Z*57.3<<endl;
       //Calculate the three-axis attitude from the IMU with the angular velocity around the three-axis and the three-axis acceleration
       //通过IMU绕三轴角速度与三轴加速度计算三轴姿态
       Quaternion_Solution(Mpu6050.angular_velocity.x, Mpu6050.angular_velocity.y, Mpu6050.angular_velocity.z,
                 Mpu6050.linear_acceleration.x, Mpu6050.linear_acceleration.y, Mpu6050.linear_acceleration.z);
       Publish_Odom();      //Pub the speedometer topic //发布里程计话题
-      Publish_ImuSensor(); //Pub the IMU topic //发布IMU话题    
+      // Publish_ImuSensor(); //Pub the IMU topic //发布IMU话题    
       // Publish_Voltage();   //Pub the topic of power supply voltage //发布电源电压话题
 
       _Last_Time = _Now; //Record the time and use it to calculate the time interval //记录时间，用于计算时间间隔
@@ -657,7 +648,7 @@ turn_on_robot::turn_on_robot():Sampling_Time(0),Power_voltage(0)
   //Set the velocity control command callback function
   //速度控制命令订阅回调函数设置
   Cmd_Vel_Sub     = n.subscribe("cmd_vel",     100, &turn_on_robot::Cmd_Vel_Callback, this); 
-  imu_sub = n.subscribe("/livox/imu", 1, &turn_on_robot::imuCallback, this);
+
   ROS_INFO_STREAM("Data ready"); //Prompt message //提示信息
   
   try

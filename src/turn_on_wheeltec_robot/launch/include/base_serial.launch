@@ -14,8 +14,8 @@
     <!-- 里程计修正参数，对来自运动底盘的速度信息进行手动修正 -->
     <param name="odom_x_scale"      type="double" value="1.0"/> 
     <param name="odom_y_scale"      type="double" value="1.0"/> 
-    <param name="odom_z_scale_positive"      type="double" value="1.0"/> 
-    <param name="odom_z_scale_negative"      type="double" value="1.0"/> 
+    <param name="odom_z_scale_positive"      type="double" value="1.946"/> 
+    <param name="odom_z_scale_negative"      type="double" value="1.946"/> 
 
     <!-- 如果开启了平滑功能，则订阅平滑速度 -->
     <remap if="$(arg smoother)" from="cmd_vel" to="smoother_cmd_vel"/>

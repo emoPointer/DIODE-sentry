@@ -32,6 +32,8 @@
         "numeric": "cpp",
         "streambuf": "cpp",
         "valarray": "cpp",
-        "tuple": "cpp"
+        "tuple": "cpp",
+        "iostream": "cpp",
+        "condition_variable": "cpp"
     }
 }
