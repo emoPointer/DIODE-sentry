@@ -70,9 +70,9 @@ void turn_on_robot::Cmd_Vel_Callback(const geometry_msgs::Twist &twist_aux)
     bytes=Stm32_Serial.write(Send_Data.tx,20); //Sends data to the downloader via serial port //通过串口向下位机发送数据 
     if(bytes != 0 && need_return_vel_x.f!=0){
       // cout<<"bytes:"<<bytes<<endl;
-      cout<<"velback_x:"<<need_return_vel_x.f<<endl;
-      cout<<"velback_y:"<<need_return_vel_y.f<<endl;
-      cout<<"velback_z:"<<need_return_vel_z.f<<endl;
+      // cout<<"velback_x:"<<need_return_vel_x.f<<endl;
+      // cout<<"velback_y:"<<need_return_vel_y.f<<endl;
+      // cout<<"velback_z:"<<need_return_vel_z.f<<endl;
       // cout<<need_return_vel_x.f<<endl;
       // printf("0X%x ",Send_Data.tx[19]);
     }
@@ -97,18 +97,34 @@ void turn_on_robot::Publish_ImuSensor()
   Imu_Data_Pub.orientation.y = Mpu6050.orientation.y; 
   Imu_Data_Pub.orientation.z = Mpu6050.orientation.z;
   Imu_Data_Pub.orientation.w = Mpu6050.orientation.w;
+  // cout<<"orientation.x:"<<Imu_Data_Pub.orientation.x<<endl;
+  // cout<<"orientation.y:"<<Imu_Data_Pub.orientation.y<<endl;
+  // cout<<"orientation.z:"<<Imu_Data_Pub.orientation.z<<endl;
   Imu_Data_Pub.orientation_covariance[0] = 1e6; //Three-axis attitude covariance matrix //三轴姿态协方差矩阵
   Imu_Data_Pub.orientation_covariance[4] = 1e6;
   Imu_Data_Pub.orientation_covariance[8] = 1e-6;
   Imu_Data_Pub.angular_velocity.x = Mpu6050.angular_velocity.x; //Triaxial angular velocity //三轴角速度
   Imu_Data_Pub.angular_velocity.y = Mpu6050.angular_velocity.y;
   Imu_Data_Pub.angular_velocity.z = Mpu6050.angular_velocity.z;
+  // cout<<"angular_velocity.x:"<<Imu_Data_Pub.angular_velocity.x<<endl;
+  // cout<<"angular_velocity.y:"<<Imu_Data_Pub.angular_velocity.y<<endl;
+  // cout<<"angular_velocity.z:"<<Imu_Data_Pub.angular_velocity.z<<endl;
+  ROS_INFO("angular_velocity.x:%f\n",Imu_Data_Pub.angular_velocity.x);
+  ROS_INFO("angular_velocity.y:%f\n",Imu_Data_Pub.angular_velocity.y);
+  ROS_INFO("angular_velocity.z:%f\n",Imu_Data_Pub.angular_velocity.z);
   Imu_Data_Pub.angular_velocity_covariance[0] = 1e6; //Triaxial angular velocity covariance matrix //三轴角速度协方差矩阵
   Imu_Data_Pub.angular_velocity_covariance[4] = 1e6;
   Imu_Data_Pub.angular_velocity_covariance[8] = 1e-6;
   Imu_Data_Pub.linear_acceleration.x = Mpu6050.linear_acceleration.x; //Triaxial acceleration //三轴线性加速度
   Imu_Data_Pub.linear_acceleration.y = Mpu6050.linear_acceleration.y; 
   Imu_Data_Pub.linear_acceleration.z = Mpu6050.linear_acceleration.z;  
+  // cout<<"linear_acceleration.x:"<<Imu_Data_Pub.linear_acceleration.x<<endl;
+  // cout<<"linear_acceleration.y:"<<Imu_Data_Pub.linear_acceleration.y<<endl;
+  // cout<<"linear_acceleration.z:"<<Imu_Data_Pub.linear_acceleration.z<<endl;
+  ROS_INFO("linear_acceleration.x:%f\n",Imu_Data_Pub.linear_acceleration.x);
+  ROS_INFO("linear_acceleration.y:%f\n",Imu_Data_Pub.linear_acceleration.y);
+  ROS_INFO("linear_acceleration.z:%f\n",Imu_Data_Pub.linear_acceleration.z);
+
   imu_publisher.publish(Imu_Data_Pub); //Pub IMU topic //发布IMU话题
 }
 /**************************************
@@ -297,7 +313,7 @@ bool turn_on_robot::Get_Sensor_Data_New()
         Mpu6050_Data.gyros_z_data = gyro[2];
         Mpu6050_Data.accele_x_data = -acc[0];
         Mpu6050_Data.accele_y_data = -acc[1];
-        Mpu6050_Data.accele_z_data = -acc[2];
+        Mpu6050_Data.accele_z_data = acc[2];          //TODO:为什么要倒？？？
         // Mpu6050_Data.gyros_x_data = 0;?
         // cout<<"Robot_gyro_x:"<<gyro[0]*57.3<<endl;
         // cout<<"Robot_gyro_y:"<<gyro[1]*57.3<<endl;
@@ -308,17 +324,17 @@ bool turn_on_robot::Get_Sensor_Data_New()
         // cout<<"Mpu6050_Data.accele_x_data:"<<Mpu6050_Data.accele_x_data<<endl;
         // cout<<"Mpu6050_Data.accele_x_data:"<<Mpu6050_Data.accele_x_data<<endl;
         // cout<<"Mpu6050_Data.accele_x_data:"<<Mpu6050_Data.accele_x_data<<endl;
-        cout<<"linear_acceleration.x:"<<Mpu6050.linear_acceleration.x<<endl;
-        cout<<"linear_acceleration.y:"<<Mpu6050.linear_acceleration.y<<endl;
-        cout<<"linear_acceleration.z:"<<Mpu6050.linear_acceleration.z<<endl;
+        // cout<<"linear_acceleration.x:"<<Mpu6050.linear_acceleration.x<<endl;
+        // cout<<"linear_acceleration.y:"<<Mpu6050.linear_acceleration.y<<endl;
+        // cout<<"linear_acceleration.z:"<<Mpu6050.linear_acceleration.z<<endl;
         // const std::type_info& typeInfo = typeid(Mpu6050.linear_acceleration.z);
         // ROS_INFO("Variable type: %s", typeInfo().name());
         Mpu6050.angular_velocity.x =  Mpu6050_Data.gyros_x_data ;
         Mpu6050.angular_velocity.y =  Mpu6050_Data.gyros_y_data ;
         Mpu6050.angular_velocity.z =  Mpu6050_Data.gyros_z_data ;
-        cout<<"Mpu6050.angular_velocity.x:"<<Mpu6050.angular_velocity.x<<endl;
-        cout<<"Mpu6050.angular_velocity.y:"<<Mpu6050.angular_velocity.y<<endl;
-        cout<<"Mpu6050.angular_velocity.z:"<<Mpu6050.angular_velocity.z<<endl;
+        // cout<<"Mpu6050.angular_velocity.x:"<<Mpu6050.angular_velocity.x<<endl;
+        // cout<<"Mpu6050.angular_velocity.y:"<<Mpu6050.angular_velocity.y<<endl;
+        // cout<<"Mpu6050.angular_velocity.z:"<<Mpu6050.angular_velocity.z<<endl;
         return true;
     }else 
       return false;
@@ -431,7 +447,7 @@ void turn_on_robot::Control()
       Quaternion_Solution(Mpu6050.angular_velocity.x, Mpu6050.angular_velocity.y, Mpu6050.angular_velocity.z,
                 Mpu6050.linear_acceleration.x, Mpu6050.linear_acceleration.y, Mpu6050.linear_acceleration.z);
       Publish_Odom();      //Pub the speedometer topic //发布里程计话题
-      // Publish_ImuSensor(); //Pub the IMU topic //发布IMU话题
+      Publish_ImuSensor(); //Pub the IMU topic //发布IMU话题
       _Last_Time = _Now; //Record the time and use it to calculate the time interval //记录时间，用于计算时间间隔
     }
     
