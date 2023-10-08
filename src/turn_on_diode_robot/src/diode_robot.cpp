@@ -25,7 +25,8 @@ Date: January 28, 2021
 Function: The speed topic subscription Callback function, according to the subscribed instructions through the serial port command control of the lower computer
 功能: 速度话题订阅回调函数Callback，根据订阅的指令通过串口发指令控制下位机
 ***************************************/
-void turn_on_robot::Cmd_Vel_Callback(const geometry_msgs::Twist &twist_aux)
+void turn_on_robot::Cmd_Vel_Callback(const geometry_msgs::Twist &twist_aux)   // 0为0x7D 1～2为0 3～6为x速度下位机需要的是厘米每秒 7～8为crc16校验 
+                                                                              // 9～12为y速度 13～16为z角速度 17～18为crc16校验 19为0x8c
 {
   short  transition;  //intermediate variable //中间变量
   float2uchar need_return_vel_x;
@@ -286,7 +287,7 @@ Date: November 18, 2021
 Function: Read and verify the data sent by the lower computer frame by frame through the serial port, and then convert the data into international units
 功能: 通过串口读取并逐帧校验下位机发送过来的数据，然后数据转换为国际单位
 ***************************************/
-bool turn_on_robot::Get_Sensor_Data_New()
+bool turn_on_robot::Get_Sensor_Data_New()         // 0为0XA5 1～12为角速度 13～24为加速度 25～36为速度 37～38为crc16校验 39为0XB2 
 {
   int bytes;
   bytes = Stm32_Serial.read(rdata,1);

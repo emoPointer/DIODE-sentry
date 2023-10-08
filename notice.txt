@@ -5,3 +5,4 @@
 "Could NOT find joy (missing: joy_DIR)
 -- Could not find the required component 'joy'. The following CMake error indicates that you either need to install the package with the same name or change your environment so that it can be found.":sudo apt-get install ros-<>-joy* 在不行删除cmakeLists.txt中的joy
 "fatal error: /usr/include/opencv2/imgproc/types_c.h: No such file or directory":改绝对路径
+车辆尺寸参数和代价地图参数在costmap_car_params.yaml中设置
