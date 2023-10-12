@@ -21,7 +21,7 @@ GlobalPlanner:
   allow_unknown:  true  
 
   #允许的创建的路径规划终点与设置目标点的偏差为多少，单位：m
-  default_tolerance: 0.0
+  default_tolerance: 0.1
 
   #是否对通过PointCloud2计算出来的potential area进行可视化
   visualize_potential: false

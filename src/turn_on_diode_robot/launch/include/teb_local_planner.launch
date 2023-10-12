@@ -1,8 +1,5 @@
 <launch>
 
-  <!-- Arguments参数 -->
-  <arg name="car_mode"  default="" />
-
   <!-- 导航路径规划公共参数 -->
   <rosparam file="$(find turn_on_diode_robot)/params_nav_common/move_base_params.yaml"          command="load" ns="move_base"/>
   <rosparam file="$(find turn_on_diode_robot)/params_nav_common/base_global_planner_param.yaml" command="load" ns="move_base"/>
@@ -20,9 +17,9 @@
   <!-- 启动导航节点 -->
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
     <!-- 导航代价地图与路径规划器对应车型参数 -->
-    <rosparam file="$(find turn_on_diode_robot)/params_costmap_car/param_$(arg car_mode)/teb_local_planner_params.yaml"  command="load"/>
-    <rosparam file="$(find turn_on_diode_robot)/params_costmap_car/param_$(arg car_mode)/costmap_car_params.yaml" command="load" ns="global_costmap" />
-    <rosparam file="$(find turn_on_diode_robot)/params_costmap_car/param_$(arg car_mode)/costmap_car_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find turn_on_diode_robot)/params_costmap_car/teb_local_planner_params.yaml"  command="load"/>
+    <rosparam file="$(find turn_on_diode_robot)/params_costmap_car/costmap_car_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find turn_on_diode_robot)/params_costmap_car/costmap_car_params.yaml" command="load" ns="local_costmap" />
   </node>
 
 </launch>

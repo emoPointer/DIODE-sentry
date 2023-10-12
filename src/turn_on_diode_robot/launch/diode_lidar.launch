@@ -1,6 +1,6 @@
 <launch>
     <arg name="rplidar_mode"  default="ls_N10P" 
-    doc="opt:  ls_M10_uart, ls_M10P_uart, ls_M10P_PLUS_uart, ls_M10_net, ls_M10P_net, ls_M10P_PLUS_net, ls_N10, ls_N10P, ld_14, ld_19, rplidar_A1_A2, rplidar_A3, rplidar_S1"/>
+    doc="opt: ls_N10P mid360 wlr_716"/>
 
     <!--所有雷达正前方（小车正前方）为0度角方向，扫描角度顺时针方向增加 -->
     <!--disable_min：多角度屏蔽角度起始值 disable_max：多角度屏蔽角度结束值 ,不开启角度屏蔽默认扫描角度为0°~360° -->
