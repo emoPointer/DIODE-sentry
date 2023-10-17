@@ -18,8 +18,6 @@
   <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
     <!-- 导航代价地图与路径规划器对应车型参数 -->
     <rosparam file="$(find turn_on_diode_robot)/params_costmap_car/teb_local_planner_params.yaml"  command="load"/>
-    <rosparam file="$(find turn_on_diode_robot)/params_costmap_car/costmap_car_params.yaml" command="load" ns="global_costmap" />
-    <rosparam file="$(find turn_on_diode_robot)/params_costmap_car/costmap_car_params.yaml" command="load" ns="local_costmap" />
   </node>
 
 </launch>
