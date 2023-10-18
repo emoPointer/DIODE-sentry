@@ -110,9 +110,9 @@ void turn_on_robot::Publish_ImuSensor()
   // cout<<"angular_velocity.x:"<<Imu_Data_Pub.angular_velocity.x<<endl;
   // cout<<"angular_velocity.y:"<<Imu_Data_Pub.angular_velocity.y<<endl;
   // cout<<"angular_velocity.z:"<<Imu_Data_Pub.angular_velocity.z<<endl;
-  ROS_INFO("angular_velocity.x:%f\n",Imu_Data_Pub.angular_velocity.x);
-  ROS_INFO("angular_velocity.y:%f\n",Imu_Data_Pub.angular_velocity.y);
-  ROS_INFO("angular_velocity.z:%f\n",Imu_Data_Pub.angular_velocity.z);
+  // ROS_INFO("angular_velocity.x:%f\n",Imu_Data_Pub.angular_velocity.x);
+  // ROS_INFO("angular_velocity.y:%f\n",Imu_Data_Pub.angular_velocity.y);
+  // ROS_INFO("angular_velocity.z:%f\n",Imu_Data_Pub.angular_velocity.z);
   Imu_Data_Pub.angular_velocity_covariance[0] = 1e6; //Triaxial angular velocity covariance matrix //三轴角速度协方差矩阵
   Imu_Data_Pub.angular_velocity_covariance[4] = 1e6;
   Imu_Data_Pub.angular_velocity_covariance[8] = 1e-6;
@@ -122,9 +122,9 @@ void turn_on_robot::Publish_ImuSensor()
   // cout<<"linear_acceleration.x:"<<Imu_Data_Pub.linear_acceleration.x<<endl;
   // cout<<"linear_acceleration.y:"<<Imu_Data_Pub.linear_acceleration.y<<endl;
   // cout<<"linear_acceleration.z:"<<Imu_Data_Pub.linear_acceleration.z<<endl;
-  ROS_INFO("linear_acceleration.x:%f\n",Imu_Data_Pub.linear_acceleration.x);
-  ROS_INFO("linear_acceleration.y:%f\n",Imu_Data_Pub.linear_acceleration.y);
-  ROS_INFO("linear_acceleration.z:%f\n",Imu_Data_Pub.linear_acceleration.z);
+  // ROS_INFO("linear_acceleration.x:%f\n",Imu_Data_Pub.linear_acceleration.x);
+  // ROS_INFO("linear_acceleration.y:%f\n",Imu_Data_Pub.linear_acceleration.y);
+  // ROS_INFO("linear_acceleration.z:%f\n",Imu_Data_Pub.linear_acceleration.z);
 
   imu_publisher.publish(Imu_Data_Pub); //Pub IMU topic //发布IMU话题
 }

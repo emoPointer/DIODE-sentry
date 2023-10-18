@@ -3,7 +3,7 @@
 
     <link name="base_link">
         <visual>
-            <origin xyz=" 0 0 0.0975" rpy="0 0 0" />
+            <origin xyz=" 0 0 0.09" rpy="0 0 0" />
             <geometry>
                 <box size="0.27 0.185 0.055"/>
             </geometry>
@@ -14,7 +14,7 @@
     </link>   
 
     <joint name="left_wheel_joint" type="continuous">
-        <origin xyz="-0.085 0.0975 0.0375" rpy="1.57 0 0"/>
+        <origin xyz="-0.2 0.2 0.09" rpy="0 0 0"/>
         <parent link="base_link"/>
         <child link="left_wheel_link"/>
         <axis xyz="0 1 0"/>
@@ -33,7 +33,7 @@
     </link>
 
     <joint name="right_wheel_joint" type="continuous">
-        <origin xyz="-0.085 -0.0975 0.0375" rpy="1.57 0 0"/>
+        <origin xyz="-0.2 -0.2 0.09" rpy="0 0 0"/>
         <parent link="base_link"/>
         <child link="right_wheel_link"/>
         <axis xyz="0 1 0"/>
@@ -52,7 +52,7 @@
     </link>
 
       <joint name="left_front_joint" type="continuous">
-        <origin xyz="0.085 0.0975 0.0375" rpy="1.57 0 0"/>
+        <origin xyz="0.2 0.2 0.09" rpy="0 0 0"/>
         <parent link="base_link"/>
         <child link="left_front_link"/>
         <axis xyz="0 1 0"/>
@@ -71,7 +71,7 @@
     </link>
 
     <joint name="right_front_joint" type="continuous">
-        <origin xyz="0.085 -0.0975 0.0375" rpy="1.57 0 0"/>
+        <origin xyz="0.2 -0.2 0.09" rpy="0 0 0"/>
         <parent link="base_link"/>
         <child link="right_front_link"/>
         <axis xyz="0 1 0"/>
