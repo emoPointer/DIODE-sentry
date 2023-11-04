@@ -1,6 +1,6 @@
 TebLocalPlannerROS:
 
- odom_topic: /odom_commblied
+ odom_topic: /odom_combined
  map_frame: map
  
  # Trajectory
@@ -24,7 +24,7 @@ TebLocalPlannerROS:
     
  # Robot
  
- max_vel_x: 1.13 #4.0
+ max_vel_x: 2.5 #4.0
  max_vel_x_backwards: 0.5
  max_vel_y: 0
  max_vel_theta: 7.0 #2.5 #4.0 # the angular velocity is also bounded by min_turning_radius in case of a carlike robot (r = v / omega)
@@ -40,7 +40,7 @@ TebLocalPlannerROS:
 
  footprint_model: # types: "point", "circular", "two_circles", "line", "polygon"
    type: "circular"
-   radius: 0.32 # for type "circular"
+   radius: 0.15 # for type "circular"
    line_start: [-0.1, 0.0] # for type "line" 线模型起始坐标
    line_end: [0.1, 0.0] # for type "line" 线模型尾部坐标
    front_offset: 0.2 # for type "two_circles" 前圆心坐标

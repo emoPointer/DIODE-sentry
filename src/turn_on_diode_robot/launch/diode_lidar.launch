@@ -1,5 +1,5 @@
 <launch>
-    <arg name="rplidar_mode"  default="ls_N10P" 
+    <arg name="rplidar_mode"  default="mid360" 
     doc="opt: ls_N10P mid360 wlr_716"/>
 
     <!--所有雷达正前方（小车正前方）为0度角方向，扫描角度顺时针方向增加 -->
@@ -17,6 +17,11 @@
     <group if="$(eval rplidar_mode == 'ls_N10P')">
         <include file="$(find lsn10)/launch/lsn10.launch"/>
         <param name="/lsn10/versions" value="2"/>
+    </group>
+
+    <!-- 启动Livox-mid360雷达 -->
+    <group if="$(eval rplidar_mode == 'mid360')">
+        <include file="$(find livox_ros_driver2)/launch/msg_MID360.launch"/>
     </group>
 
 </launch>

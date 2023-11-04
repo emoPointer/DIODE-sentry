@@ -189,7 +189,6 @@ class turn_on_robot
 	public:
 		turn_on_robot();  //Constructor //构造函数
 		~turn_on_robot(); //Destructor //析构函数
-		void Control();   //Loop control code //循环控制代码
 		serial::Serial Stm32_Serial; //Declare a serial object //声明串口对象 
     	int databits, stopbits, parity;
     	unsigned char rdata[255];                 // raw_data
@@ -208,18 +207,8 @@ class turn_on_robot
 		//速度话题订阅回调函数
 		void Cmd_Vel_Callback(const geometry_msgs::Twist &twist_aux);              
 
-		ros::Publisher odom_publisher, imu_publisher; //Initialize the topic publisher //初始化话题发布者
-		void Publish_Odom();      //Pub the speedometer topic //发布里程计话题
-		void Publish_ImuSensor(); //Pub the IMU sensor topic //发布IMU传感器话题
-		bool getGyro(unsigned char *data);
-		bool getAcc(unsigned char *data);
-		bool get_xyspeed_and_z(unsigned char *data);
-		float exchange_data(unsigned char *data,float need_return_float_data);
-
         //从串口(ttyUSB)读取运动底盘速度、IMU、电源电压数据
         //Read motion chassis speed, IMU, power supply voltage data from serial port (ttyUSB)
-        bool Get_Sensor_Data();   
-		bool Get_Sensor_Data_New();
         unsigned char Check_Sum(unsigned char Count_Number,unsigned char mode); //BBC check function //BBC校验函数
 		uint16_t Get_CRC16_Check_Sum(uint8_t *pchMessage, uint32_t dwLength, uint16_t wCRC);//CRC
 		void Append_CRC16_Check_Sum(uint8_t *pchMessage, uint32_t dwLength);//CRC校验
@@ -227,9 +216,6 @@ class turn_on_robot
 		void Append_CRC8_Check_Sum(unsigned char *pchMessage, unsigned int dwLength);
 		unsigned int Verify_CRC8_Check_Sum(unsigned char *pchMessage, unsigned int dwLength);
 		uint32_t Verify_CRC16_Check_Sum(uint8_t *pchMessage, uint32_t dwLength);
-
-        short IMU_Trans(uint8_t Data_High,uint8_t Data_Low);  //IMU data conversion read //IMU数据转化读取
-		float Odom_Trans(uint8_t Data_High,uint8_t Data_Low); //Odometer data is converted to read //里程计数据转化读取
 
         string usart_port_name, robot_frame_id, gyro_frame_id, odom_frame_id; //Define the related variables //定义相关变量
         int serial_baud_rate;      //Serial communication baud rate //串口通信波特率

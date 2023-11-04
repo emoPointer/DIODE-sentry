@@ -1,6 +1,5 @@
 #include "diode_robot.h"
 #include "Quaternion_Solution.h"
-int cnt=0;
 sensor_msgs::Imu Mpu6050;//Instantiate an IMU object //实例化IMU对象 
 
 /**************************************
@@ -12,9 +11,10 @@ int main(int argc, char** argv)
 {
   ros::init(argc, argv, "diode_robot"); //ROS initializes and sets the node name //ROS初始化 并设置节点名称 
   turn_on_robot Robot_Control; //Instantiate an object //实例化一个对象
-  Robot_Control.Control(); //Loop through data collection and publish the topic //循环执行数据采集和发布话题等操作
+  ros::spinOnce(); 
   return 0;  
 } 
+
 typedef union
 {
     float f;
@@ -83,89 +83,7 @@ void turn_on_robot::Cmd_Vel_Callback(const geometry_msgs::Twist &twist_aux)   //
     ROS_ERROR_STREAM("Unable to send data through serial port"); //If sending data fails, an error message is printed //如果发送数据失败，打印错误信息
   }
 }
-/**************************************
-Date: January 28, 2021
-Function: Publish the IMU data topic
-功能: 发布IMU数据话题
-***************************************/
-void turn_on_robot::Publish_ImuSensor()
-{
-  sensor_msgs::Imu Imu_Data_Pub; //Instantiate IMU topic data //实例化IMU话题数据
-  Imu_Data_Pub.header.stamp = ros::Time::now(); 
-  Imu_Data_Pub.header.frame_id = gyro_frame_id; //IMU corresponds to TF coordinates, which is required to use the robot_pose_ekf feature pack 
-                                                //IMU对应TF坐标，使用robot_pose_ekf功能包需要设置此项
-  Imu_Data_Pub.orientation.x = Mpu6050.orientation.x; //A quaternion represents a three-axis attitude //四元数表达三轴姿态
-  Imu_Data_Pub.orientation.y = Mpu6050.orientation.y; 
-  Imu_Data_Pub.orientation.z = Mpu6050.orientation.z;
-  Imu_Data_Pub.orientation.w = Mpu6050.orientation.w;
-  // cout<<"orientation.x:"<<Imu_Data_Pub.orientation.x<<endl;
-  // cout<<"orientation.y:"<<Imu_Data_Pub.orientation.y<<endl;
-  // cout<<"orientation.z:"<<Imu_Data_Pub.orientation.z<<endl;
-  Imu_Data_Pub.orientation_covariance[0] = 1e6; //Three-axis attitude covariance matrix //三轴姿态协方差矩阵
-  Imu_Data_Pub.orientation_covariance[4] = 1e6;
-  Imu_Data_Pub.orientation_covariance[8] = 1e-6;
-  Imu_Data_Pub.angular_velocity.x = Mpu6050.angular_velocity.x; //Triaxial angular velocity //三轴角速度
-  Imu_Data_Pub.angular_velocity.y = Mpu6050.angular_velocity.y;
-  Imu_Data_Pub.angular_velocity.z = Mpu6050.angular_velocity.z;
-  // cout<<"angular_velocity.x:"<<Imu_Data_Pub.angular_velocity.x<<endl;
-  // cout<<"angular_velocity.y:"<<Imu_Data_Pub.angular_velocity.y<<endl;
-  // cout<<"angular_velocity.z:"<<Imu_Data_Pub.angular_velocity.z<<endl;
-  // ROS_INFO("angular_velocity.x:%f\n",Imu_Data_Pub.angular_velocity.x);
-  // ROS_INFO("angular_velocity.y:%f\n",Imu_Data_Pub.angular_velocity.y);
-  // ROS_INFO("angular_velocity.z:%f\n",Imu_Data_Pub.angular_velocity.z);
-  Imu_Data_Pub.angular_velocity_covariance[0] = 1e6; //Triaxial angular velocity covariance matrix //三轴角速度协方差矩阵
-  Imu_Data_Pub.angular_velocity_covariance[4] = 1e6;
-  Imu_Data_Pub.angular_velocity_covariance[8] = 1e-6;
-  Imu_Data_Pub.linear_acceleration.x = Mpu6050.linear_acceleration.x; //Triaxial acceleration //三轴线性加速度
-  Imu_Data_Pub.linear_acceleration.y = Mpu6050.linear_acceleration.y; 
-  Imu_Data_Pub.linear_acceleration.z = Mpu6050.linear_acceleration.z;  
-  // cout<<"linear_acceleration.x:"<<Imu_Data_Pub.linear_acceleration.x<<endl;
-  // cout<<"linear_acceleration.y:"<<Imu_Data_Pub.linear_acceleration.y<<endl;
-  // cout<<"linear_acceleration.z:"<<Imu_Data_Pub.linear_acceleration.z<<endl;
-  // ROS_INFO("linear_acceleration.x:%f\n",Imu_Data_Pub.linear_acceleration.x);
-  // ROS_INFO("linear_acceleration.y:%f\n",Imu_Data_Pub.linear_acceleration.y);
-  // ROS_INFO("linear_acceleration.z:%f\n",Imu_Data_Pub.linear_acceleration.z);
 
-  imu_publisher.publish(Imu_Data_Pub); //Pub IMU topic //发布IMU话题
-}
-/**************************************
-Date: January 28, 2021
-Function: Publish the odometer topic, Contains position, attitude, triaxial velocity, angular velocity about triaxial, TF parent-child coordinates, and covariance matrix
-功能: 发布里程计话题，包含位置、姿态、三轴速度、绕三轴角速度、TF父子坐标、协方差矩阵
-***************************************/
-void turn_on_robot::Publish_Odom()
-{
-    //Convert the Z-axis rotation Angle into a quaternion for expression 
-    //把Z轴转角转换为四元数进行表达
-    geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(Robot_Pos.Z);
-
-    nav_msgs::Odometry odom; //Instance the odometer topic data //实例化里程计话题数据
-    odom.header.stamp = ros::Time::now(); 
-    odom.header.frame_id = odom_frame_id; // Odometer TF parent coordinates //里程计TF父坐标
-    odom.pose.pose.position.x = Robot_Pos.X; //Position //位置
-    odom.pose.pose.position.y = Robot_Pos.Y;
-    odom.pose.pose.position.z = Robot_Pos.Z;
-    odom.pose.pose.orientation = odom_quat; //Posture, Quaternion converted by Z-axis rotation //姿态，通过Z轴转角转换的四元数
-
-    odom.child_frame_id = robot_frame_id; // Odometer TF subcoordinates //里程计TF子坐标
-    odom.twist.twist.linear.x =  Robot_Vel.X; //Speed in the X direction //X方向速度
-    odom.twist.twist.linear.y =  Robot_Vel.Y; //Speed in the Y direction //Y方向速度
-    odom.twist.twist.angular.z = Robot_Vel.Z; //Angular velocity around the Z axis //绕Z轴角速度 
-
-    //There are two types of this matrix, which are used when the robot is at rest and when it is moving.Extended Kalman Filtering officially provides 2 matrices for the robot_pose_ekf feature pack
-    //这个矩阵有两种，分别在机器人静止和运动的时候使用。扩展卡尔曼滤波官方提供的2个矩阵，用于robot_pose_ekf功能包
-    if(Robot_Vel.X== 0&&Robot_Vel.Y== 0&&Robot_Vel.Z== 0)
-      //If the velocity is zero, it means that the error of the encoder will be relatively small, and the data of the encoder will be considered more reliable
-      //如果velocity是零，说明编码器的误差会比较小，认为编码器数据更可靠
-      memcpy(&odom.pose.covariance, odom_pose_covariance2, sizeof(odom_pose_covariance2)),
-      memcpy(&odom.twist.covariance, odom_twist_covariance2, sizeof(odom_twist_covariance2));
-    else
-      //If the velocity of the trolley is non-zero, considering the sliding error that may be brought by the encoder in motion, the data of IMU is considered to be more reliable
-      //如果小车velocity非零，考虑到运动中编码器可能带来的滑动误差，认为imu的数据更可靠
-      memcpy(&odom.pose.covariance, odom_pose_covariance, sizeof(odom_pose_covariance)),
-      memcpy(&odom.twist.covariance, odom_twist_covariance, sizeof(odom_twist_covariance));       
-    odom_publisher.publish(odom); //Pub odometer topic //发布里程计话题
-}
 /**************************************
 Date: January 28, 2021
 Function: Serial port communication check function, packet n has a byte, the NTH -1 byte is the check bit, the NTH byte bit frame end.Bit XOR results from byte 1 to byte n-2 are compared with byte n-1, which is a BCC check
@@ -282,179 +200,7 @@ uint32_t turn_on_robot::Verify_CRC16_Check_Sum(uint8_t *pchMessage, uint32_t dwL
 	wExpected = Get_CRC16_Check_Sum(pchMessage, dwLength - 2, CRC_INIT);
 	return ((wExpected & 0xff) == pchMessage[dwLength - 2] && ((wExpected >> 8) & 0xff) == pchMessage[dwLength - 1]);
 }
-/**************************************
-Date: November 18, 2021
-Function: Read and verify the data sent by the lower computer frame by frame through the serial port, and then convert the data into international units
-功能: 通过串口读取并逐帧校验下位机发送过来的数据，然后数据转换为国际单位
-***************************************/
-bool turn_on_robot::Get_Sensor_Data_New()         // 0为0XA5 1～12为角速度 13～24为加速度 25～36为速度 37～38为crc16校验 39为0XB2 
-{
-  int bytes;
-  bytes = Stm32_Serial.read(rdata,1);
-  if(rdata[0]==0XA5){
-  bytes = Stm32_Serial.read(rdata+1,31);
-  bytes = Stm32_Serial.read(rdata+32,8);
-  //  printf("0x%02X ", (unsigned char)rdata[0]);
-  // cout<<hex<<rdata[0];
-  //  printf("0X%x ",rdata[0]);
-  // printf("0X%x ",rdata[59]);
-    if (rdata[0]==0XA5 && Verify_CRC16_Check_Sum(rdata,39) && rdata[39]==0XB2)
-    {
-        getGyro(&rdata[1]);
-        getAcc(&rdata[13]);
-        get_xyspeed_and_z(&rdata[25]);
-        Robot_Vel.X = vel[0];
-        Robot_Vel.Y = vel[1];
-        Robot_Vel.Z = vel[2];
-        // cout<<"Robot_Vel.X:"<<Robot_Vel.X<<endl;
-        // cout<<"Robot_Vel.Y:"<<Robot_Vel.Y<<endl;
-        // cout<<"Robot_Vel.Z:"<<Robot_Vel.Z<<endl;
-        Mpu6050_Data.gyros_x_data = -gyro[0];
-        Mpu6050_Data.gyros_y_data = -gyro[1];
-        Mpu6050_Data.gyros_z_data = gyro[2];
-        Mpu6050_Data.accele_x_data = -acc[0];
-        Mpu6050_Data.accele_y_data = -acc[1];
-        Mpu6050_Data.accele_z_data = acc[2];          //TODO:为什么要倒？？？
-        // Mpu6050_Data.gyros_x_data = 0;?
-        // cout<<"Robot_gyro_x:"<<gyro[0]*57.3<<endl;
-        // cout<<"Robot_gyro_y:"<<gyro[1]*57.3<<endl;
-        // cout<<"Robot_gyro_z:"<<gyro[2]*57.3<<endl;
-        Mpu6050.linear_acceleration.x = Mpu6050_Data.accele_x_data ;
-        Mpu6050.linear_acceleration.y = Mpu6050_Data.accele_y_data ;
-        Mpu6050.linear_acceleration.z = Mpu6050_Data.accele_z_data ;
-        // cout<<"Mpu6050_Data.accele_x_data:"<<Mpu6050_Data.accele_x_data<<endl;
-        // cout<<"Mpu6050_Data.accele_x_data:"<<Mpu6050_Data.accele_x_data<<endl;
-        // cout<<"Mpu6050_Data.accele_x_data:"<<Mpu6050_Data.accele_x_data<<endl;
-        // cout<<"linear_acceleration.x:"<<Mpu6050.linear_acceleration.x<<endl;
-        // cout<<"linear_acceleration.y:"<<Mpu6050.linear_acceleration.y<<endl;
-        // cout<<"linear_acceleration.z:"<<Mpu6050.linear_acceleration.z<<endl;
-        // const std::type_info& typeInfo = typeid(Mpu6050.linear_acceleration.z);
-        // ROS_INFO("Variable type: %s", typeInfo().name());
-        Mpu6050.angular_velocity.x =  Mpu6050_Data.gyros_x_data ;
-        Mpu6050.angular_velocity.y =  Mpu6050_Data.gyros_y_data ;
-        Mpu6050.angular_velocity.z =  Mpu6050_Data.gyros_z_data ;
-        // cout<<"Mpu6050.angular_velocity.x:"<<Mpu6050.angular_velocity.x<<endl;
-        // cout<<"Mpu6050.angular_velocity.y:"<<Mpu6050.angular_velocity.y<<endl;
-        // cout<<"Mpu6050.angular_velocity.z:"<<Mpu6050.angular_velocity.z<<endl;
-        return true;
-    }else 
-      return false;
-  }else
-    return false;
-}
 
-bool turn_on_robot::get_xyspeed_and_z(unsigned char *data)
-{
-    unsigned char* f1 = &data[0];
-    unsigned char* f2 = &data[4];
-    unsigned char* f3 = &data[8];
-
-    vel[0] = exchange_data(f1,process_float_data[24]);
-    vel[1] = exchange_data(f2,process_float_data[28]);
-    vel[2] = exchange_data(f3,process_float_data[32]);
-    return true;
-}
-
-/**
- * @brief 解算角速度数据
- * 
- * @param data 角速度首地址指针
- * @return
- */
-bool turn_on_robot::getGyro(unsigned char *data)
-{    
-    unsigned char* f1 = &data[0];
-    unsigned char* f2 = &data[4];
-    unsigned char* f3 = &data[8];
-
-    gyro[0] = exchange_data(f1,process_float_data[0]);
-    gyro[1] = exchange_data(f2,process_float_data[4]);
-    gyro[2] = exchange_data(f3,process_float_data[8]);
-    return true;
-}
-
-/**
- * @brief 解算加速度数据
- * 
- * @param data 加速度首地址指针
- * @return
- */
-bool turn_on_robot::getAcc(unsigned char *data)
-{
-    unsigned char* f1 = &data[0];
-    unsigned char* f2 = &data[4];
-    unsigned char* f3 = &data[8];
-
-    acc[0] = exchange_data(f1,process_float_data[12]);
-    acc[1] = exchange_data(f2,process_float_data[16]);
-    acc[2] = exchange_data(f3,process_float_data[20]);
-    return true;
-}
-/**
- * @brief 将4个uchar转换为float
- * @param data data首地址指针
- * @return
- */
-// float SerialPort::exchange_data(unsigned char *data)
-// {
-//     float float_data;
-//     float_data = *((float*)data);
-//     return float_data;
-// };
-float turn_on_robot::exchange_data(unsigned char *data,float need_return_float_data)
-{
-    *((uint8_t *)&need_return_float_data) = data[0];
-    *(((uint8_t *)&need_return_float_data+1)) = data[1];
-    *(((uint8_t *)&need_return_float_data+2)) = data[2];
-    *(((uint8_t *)&need_return_float_data+3)) = data[3];
-    return need_return_float_data;
-};
-/**************************************
-Date: January 28, 2021
-Function: Loop access to the lower computer data and issue topics
-功能: 循环获取下位机数据与发布话题
-***************************************/
-void turn_on_robot::Control()
-{
-  while(ros::ok())
-  { 
-    
-    if (true == Get_Sensor_Data_New()) //The serial port reads and verifies the data sent by the lower computer, and then the data is converted to international units
-                                       //通过串口读取并校验下位机发送过来的数据，然后数据转换为国际单位
-    {
-      _Now = ros::Time::now();
-      if(_Last_Time.toSec()==0) _Last_Time=_Now; //Perform this operation when entering for the first time to avoid excessive integration time
-                                                 //首次进入时进行此操作，避免积分时间过大
-      Sampling_Time = (_Now - _Last_Time).toSec(); //Retrieves time interval, which is used to integrate velocity to obtain displacement (mileage) 
-                                                   //获取时间间隔，用于积分速度获得位移(里程)
-      
-      //Odometer correction parameters
-      //里程计误差修正
-      Robot_Vel.X=Robot_Vel.X*odom_x_scale;
-      Robot_Vel.Y=Robot_Vel.Y*odom_y_scale;
-      if(Robot_Vel.Z>=0)
-        Robot_Vel.Z=Robot_Vel.Z*odom_z_scale_positive;
-      else
-        Robot_Vel.Z=Robot_Vel.Z*odom_z_scale_negative;
-
-      //Speed * Time = displacement (odometer)
-      //速度*时间=位移（里程计）
-      Robot_Pos.X+=(Robot_Vel.X * cos(Robot_Pos.Z) - Robot_Vel.Y * sin(Robot_Pos.Z)) * Sampling_Time; //Calculate the displacement in the X direction, unit: m //计算X方向的位移，单位：m
-      Robot_Pos.Y+=(Robot_Vel.X * sin(Robot_Pos.Z) + Robot_Vel.Y * cos(Robot_Pos.Z)) * Sampling_Time; //Calculate the displacement in the Y direction, unit: m //计算Y方向的位移，单位：m
-      Robot_Pos.Z+=Robot_Vel.Z * Sampling_Time; //The angular displacement about the Z axis, in rad //绕Z轴的角位移，单位：rad 
-      // cout<<"Robot_Pos.Z"<<Robot_Pos.Z*57.3<<endl;
-      //Calculate the three-axis attitude from the IMU with the angular velocity around the three-axis and the three-axis acceleration
-      //通过IMU绕三轴角速度与三轴加速度计算三轴姿态
-      Quaternion_Solution(Mpu6050.angular_velocity.x, Mpu6050.angular_velocity.y, Mpu6050.angular_velocity.z,
-                Mpu6050.linear_acceleration.x, Mpu6050.linear_acceleration.y, Mpu6050.linear_acceleration.z);
-      Publish_Odom();      //Pub the speedometer topic //发布里程计话题
-      Publish_ImuSensor(); //Pub the IMU topic //发布IMU话题
-      _Last_Time = _Now; //Record the time and use it to calculate the time interval //记录时间，用于计算时间间隔
-    }
-    
-    ros::spinOnce();   //The loop waits for the callback function //循环等待回调函数
-  }
-}
 /**************************************
 Date: January 28, 2021
 Function: Constructor, executed only once, for initialization
@@ -485,9 +231,6 @@ turn_on_robot::turn_on_robot():Sampling_Time(0)
   private_nh.param<float>("odom_y_scale",    odom_y_scale,    1.0); 
   private_nh.param<float>("odom_z_scale_positive",    odom_z_scale_positive,    1.0); 
   private_nh.param<float>("odom_z_scale_negative",    odom_z_scale_negative,    1.0); 
-
-  odom_publisher    = n.advertise<nav_msgs::Odometry>("odom", 50); //Create the odometer topic publisher //创建里程计话题发布者
-  imu_publisher     = n.advertise<sensor_msgs::Imu>("imu", 20); //Create an IMU topic publisher //创建IMU话题发布者
 
   //Set the velocity control command callback function
   //速度控制命令订阅回调函数设置

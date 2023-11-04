@@ -1,25 +1,18 @@
 <launch>
-  <arg name="car_mode"  default="" />
 
   <!-- 用于robot_state_publisher节点-->
   <node pkg="tf" type="static_transform_publisher" name="base_to_link" args="0 0 0 0 0 0 base_footprint base_link 100" />
   
   <!--静态坐标变换，需要实测 -->
-  <!-- car_mode and tf  mini_mec-->
-  <group if="$(eval car_mode == 'mini_mec')">
-      <!-- 雷达到底盘-->
-      <node pkg="tf" type="static_transform_publisher" name="base_to_laser" args="0 -0.16 0.16 3.14 0 0  base_footprint laser 100" />
-      <!-- 摄像头到底盘-->
-      <node pkg="tf" type="static_transform_publisher" name="base_to_camera" args="0.12 0 0.15 0 0 0   base_footprint camera_link 100" />
-      <!-- imu到底盘 -->
-      <node pkg="tf" type="static_transform_publisher" name="base_to_gyro" args="-0 0.2 0 0 0 0 base_footprint gyro_link 100" />
-  </group>
+<!-- lidar到底盘-->
+    <node pkg="tf" type="static_transform_publisher" name="livox_frame" args="0.13 0.18 0.80 0 3.14 0  base_footprint livox_frame 100" />
+<!-- 摄像头到底盘-->
+    <node pkg="tf" type="static_transform_publisher" name="base_to_camera" args="0.12 0 0.15 0 0 0   base_footprint camera_link 100" />
+<!-- imu到底盘 -->
+    <node pkg="tf" type="static_transform_publisher" name="base_to_gyro" args="-0.04 0.14 0.04 0 0 0 base_footprint gyro_link 100" />
   
   <!-- URDF 标准化机器人描述格式 -->
-  <group if="$(eval car_mode == 'mini_mec')">
-      <param name = "robot_description" textfile = "$(find turn_on_diode_robot)/urdf/mini_mec_robot.urdf"/> 
-  </group>
-  
+    <param name = "robot_description" textfile = "$(find turn_on_diode_robot)/urdf/mini_mec_robot.urdf"/> 
   <!-- 读取urdf信息(robot_description) 发布话题：/joint_states-->
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
   <!-- 订阅话题：/joint_states，发布小车TF信息-->

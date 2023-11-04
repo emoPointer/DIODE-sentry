@@ -1,0 +1,5 @@
+<launch>
+
+    <node pkg="PointCloud_To_LasarScan" name="point_cloud2d" type="point_cloud2d"/>
+
+</launch>

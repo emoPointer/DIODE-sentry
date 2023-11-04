@@ -11,7 +11,7 @@
     <param name="robot_frame_id"     type="string" value="base_footprint"/> 
     <param name="gyro_frame_id"      type="string" value="gyro_link"/> 
 
-    <!-- 里程计修正参数，对来自电控的速度信息进行手动修正 -->
+    <!-- 里程计修正参数，对来自电控的速度信息进行手动修正,3d时没用到 -->
     <param name="odom_x_scale"      type="double" value="1.0"/>   
     <param name="odom_y_scale"      type="double" value="1.0"/> 
     <param name="odom_z_scale_positive"      type="double" value="1.946"/> 
@@ -20,14 +20,7 @@
     <!-- 如果开启了平滑功能，则订阅平滑速度smoother_cmd_vel -->
     <remap if="$(arg smoother)" from="cmd_vel" to="smoother_cmd_vel"/>
 
-    <!-- 如果使用飞迪系的惯导，对板载IMU话题进行重命名，避免相关节点订阅板载IMU话题 -->
-    <remap if="$(arg use_FDI_IMU_GNSS)" from="imu" to="imu_on_board"/>
   </node>
-
-  <!-- 如果使用飞迪系的惯导，启动相关launch文件，该节点发布的IMU话题名称就是【/imu】 -->
-  <include if="$(arg use_FDI_IMU_GNSS)" 
-    file="$(find fdilink_ahrs)/launch/ahrs_data.launch" >
-  </include>
 
   <!-- 如果开启了速度平滑功能，则运行速度平滑功能包 -->
   <include if="$(arg smoother)" 
