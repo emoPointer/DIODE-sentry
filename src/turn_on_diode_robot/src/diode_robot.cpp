@@ -1,18 +1,13 @@
 #include "diode_robot.h"
 #include "Quaternion_Solution.h"
 int cnt=0;
-sensor_msgs::Imu Mpu6050;//Instantiate an IMU object //实例化IMU对象 
+sensor_msgs::Imu Mpu6050;
 
-/**************************************
-Date: January 28, 2021
-Function: The main function, ROS initialization, creates the Robot_control object through the Turn_on_robot class and automatically calls the constructor initialization
-功能: 主函数，ROS初始化，通过turn_on_robot类创建Robot_control对象并自动调用构造函数初始化
-***************************************/
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "diode_robot"); //ROS initializes and sets the node name //ROS初始化 并设置节点名称 
-  turn_on_robot Robot_Control; //Instantiate an object //实例化一个对象
-  Robot_Control.Control(); //Loop through data collection and publish the topic //循环执行数据采集和发布话题等操作
+  ros::init(argc, argv, "diode_robot"); 
+  turn_on_robot Robot_Control; 
+  Robot_Control.Control();
   return 0;  
 } 
 typedef union
@@ -20,13 +15,8 @@ typedef union
     float f;
     unsigned char c[4];
 } float2uchar;
-/**************************************
-Date: January 28, 2021
-Function: The speed topic subscription Callback function, according to the subscribed instructions through the serial port command control of the lower computer
-功能: 速度话题订阅回调函数Callback，根据订阅的指令通过串口发指令控制下位机
-***************************************/
-void turn_on_robot::Cmd_Vel_Callback(const geometry_msgs::Twist &twist_aux)   // 0为0x7D 1～2为0 3～6为x速度下位机需要的是厘米每秒 7～8为crc16校验 
-                                                                              // 9～12为y速度 13～16为z角速度 17～18为crc16校验 19为0x8c
+
+void turn_on_robot::Cmd_Vel_Callback(const geometry_msgs::Twist &twist_aux)   
 {
   short  transition;  //intermediate variable //中间变量
   float2uchar need_return_vel_x;
@@ -83,11 +73,7 @@ void turn_on_robot::Cmd_Vel_Callback(const geometry_msgs::Twist &twist_aux)   //
     ROS_ERROR_STREAM("Unable to send data through serial port"); //If sending data fails, an error message is printed //如果发送数据失败，打印错误信息
   }
 }
-/**************************************
-Date: January 28, 2021
-Function: Publish the IMU data topic
-功能: 发布IMU数据话题
-***************************************/
+
 void turn_on_robot::Publish_ImuSensor()
 {
   sensor_msgs::Imu Imu_Data_Pub; //Instantiate IMU topic data //实例化IMU话题数据
@@ -128,11 +114,7 @@ void turn_on_robot::Publish_ImuSensor()
 
   imu_publisher.publish(Imu_Data_Pub); //Pub IMU topic //发布IMU话题
 }
-/**************************************
-Date: January 28, 2021
-Function: Publish the odometer topic, Contains position, attitude, triaxial velocity, angular velocity about triaxial, TF parent-child coordinates, and covariance matrix
-功能: 发布里程计话题，包含位置、姿态、三轴速度、绕三轴角速度、TF父子坐标、协方差矩阵
-***************************************/
+
 void turn_on_robot::Publish_Odom()
 {
     //Convert the Z-axis rotation Angle into a quaternion for expression 
@@ -166,13 +148,7 @@ void turn_on_robot::Publish_Odom()
       memcpy(&odom.twist.covariance, odom_twist_covariance, sizeof(odom_twist_covariance));       
     odom_publisher.publish(odom); //Pub odometer topic //发布里程计话题
 }
-/**************************************
-Date: January 28, 2021
-Function: Serial port communication check function, packet n has a byte, the NTH -1 byte is the check bit, the NTH byte bit frame end.Bit XOR results from byte 1 to byte n-2 are compared with byte n-1, which is a BCC check
-Input parameter: Count_Number: Check the first few bytes of the packet
-功能: 串口通讯校验函数，数据包n有个字节，第n-1个字节为校验位，第n个字节位帧尾。第1个字节到第n-2个字节数据按位异或的结果与第n-1个字节对比，即为BCC校验
-输入参数： Count_Number：数据包前几个字节加入校验   mode：对发送数据还是接收数据进行校验
-***************************************/
+
 unsigned char turn_on_robot::Check_Sum(unsigned char Count_Number,unsigned char mode)
 {
   unsigned char check_sum=0,k;
@@ -193,11 +169,6 @@ unsigned char turn_on_robot::Check_Sum(unsigned char Count_Number,unsigned char 
   }
   return check_sum; //Returns the bitwise XOR result //返回按位异或结果
 }
-/**************************************
-Date: May 11, 2023
-功能: CRC发送校验中间函数
-输入参数： 
-***************************************/
 uint16_t CRC_INIT = 0xffff;
 const unsigned char CRC8_INIT = 0xff;
 uint16_t turn_on_robot::Get_CRC16_Check_Sum(uint8_t *pchMessage, uint32_t dwLength, uint16_t wCRC)
@@ -229,11 +200,7 @@ unsigned char turn_on_robot::Get_CRC8_Check_Sum(unsigned char *pchMessage, unsig
 
 	return (ucCRC8);
 }
-/**************************************
-Date: May 11, 2023
-功能: CRC发送校验
-输入参数： 
-***************************************/
+
 void turn_on_robot::Append_CRC16_Check_Sum(uint8_t *pchMessage, uint32_t dwLength)
 {
 	uint16_t wCRC = 0;
@@ -256,11 +223,7 @@ void turn_on_robot::Append_CRC8_Check_Sum(unsigned char *pchMessage, unsigned in
 	ucCRC = Get_CRC8_Check_Sum((unsigned char *)pchMessage, dwLength - 1, CRC8_INIT);
 	pchMessage[dwLength - 1] = ucCRC;
 }
-/**************************************
-Date: May 11, 2023
-功能: CRC接收校验
-输入参数： 
-***************************************/
+
 unsigned int turn_on_robot::Verify_CRC8_Check_Sum(unsigned char *pchMessage, unsigned int dwLength)
 {
 	unsigned char ucExpected = 0;
@@ -282,11 +245,7 @@ uint32_t turn_on_robot::Verify_CRC16_Check_Sum(uint8_t *pchMessage, uint32_t dwL
 	wExpected = Get_CRC16_Check_Sum(pchMessage, dwLength - 2, CRC_INIT);
 	return ((wExpected & 0xff) == pchMessage[dwLength - 2] && ((wExpected >> 8) & 0xff) == pchMessage[dwLength - 1]);
 }
-/**************************************
-Date: November 18, 2021
-Function: Read and verify the data sent by the lower computer frame by frame through the serial port, and then convert the data into international units
-功能: 通过串口读取并逐帧校验下位机发送过来的数据，然后数据转换为国际单位
-***************************************/
+
 bool turn_on_robot::Get_Sensor_Data_New()         // 0为0XA5 1～12为角速度 13～24为加速度 25～36为速度 37～38为crc16校验 39为0XB2 
 {
   int bytes;
@@ -409,11 +368,7 @@ float turn_on_robot::exchange_data(unsigned char *data,float need_return_float_d
     *(((uint8_t *)&need_return_float_data+3)) = data[3];
     return need_return_float_data;
 };
-/**************************************
-Date: January 28, 2021
-Function: Loop access to the lower computer data and issue topics
-功能: 循环获取下位机数据与发布话题
-***************************************/
+
 void turn_on_robot::Control()
 {
   while(ros::ok())
@@ -455,11 +410,6 @@ void turn_on_robot::Control()
     ros::spinOnce();   //The loop waits for the callback function //循环等待回调函数
   }
 }
-/**************************************
-Date: January 28, 2021
-Function: Constructor, executed only once, for initialization
-功能: 构造函数, 只执行一次，用于初始化
-***************************************/
 turn_on_robot::turn_on_robot():Sampling_Time(0)
 {
   //Clear the data
@@ -514,11 +464,7 @@ turn_on_robot::turn_on_robot():Sampling_Time(0)
     ROS_INFO_STREAM("diode_robot Stm32_serial port opened"); //Serial port opened successfully //串口开启成功提示
   }
 }
-/**************************************
-Date: January 28, 2021
-Function: Destructor, executed only once and called by the system when an object ends its life cycle
-功能: 析构函数，只执行一次，当对象结束其生命周期时系统会调用这个函数
-***************************************/
+
 turn_on_robot::~turn_on_robot()
 {
   //Sends the stop motion command to the lower machine before the turn_on_robot object ends
